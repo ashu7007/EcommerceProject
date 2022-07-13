@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+
+{% block header %}
+  <h1>{% block title %}Email confirmation{% endblock %}</h1>
+{% endblock %}
+
+{% block content %}
+  <form action="{{ url_for('auth.verify') }}" method="post">
+    <label for="otp">Please enter the otp,which is sent in you email</label>
+    <input name="otp" id="otp" required>
+    <input type="submit" value="OTP_Value">
+  </form>
+{% endblock %}
