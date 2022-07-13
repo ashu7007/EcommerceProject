@@ -5,7 +5,7 @@ from dbConfig.db import db
 
 
 class Userdata(db.Model):
-    __tablename__ = 'Userdata'
+    __tablename__ = 'userdata'
     id = db.Column(db.Integer, primary_key=True)
     full_name = db.Column(db.String(255), nullable=False)
     email = db.Column(db.String(255), nullable=False)
@@ -26,7 +26,7 @@ class Userdata(db.Model):
 class OTP(db.Model):
     __tablename__ = 'otp'
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('Userdata.id'))
+    user_id = db.Column(db.Integer, db.ForeignKey('userdata.id'))
     otp =  db.Column(db.Integer, nullable=False)
     created_at = db.Column(db.DateTime)
     updated_at =db.Column(db.DateTime)

@@ -1,6 +1,6 @@
 
 
-CREATE TABLE Userdata(
+CREATE TABLE userdata(
    id  SERIAL   PRIMARY KEY,
    full_name   VARCHAR(255)  NOT NULL,
    email       VARCHAR(255)  NOT NULL,
@@ -15,7 +15,7 @@ CREATE TABLE Userdata(
    updated_at  timestamp with time zone not null );
 
 
-CREATE TABLE OTP (
+CREATE TABLE otp (
    id  SERIAL   PRIMARY KEY,
    user_id int NOT NULL,
    otp int NOT NULL,

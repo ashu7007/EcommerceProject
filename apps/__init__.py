@@ -11,8 +11,8 @@ def create_app():
     Bootstrap(app)
     
     # DB configuration
-    username = 'postgres'
-    password = 'postgres'
+    username = 'admin'
+    password = 'admin'
     host_url ='localhost'
     port = '5432'
     db_name = 'ecommerce'
@@ -25,8 +25,8 @@ def create_app():
     # configuration of mail
     app.config['MAIL_SERVER']='smtp.gmail.com'
     app.config['MAIL_PORT'] = 465
-    app.config['MAIL_USERNAME'] = '.com'
-    app.config['MAIL_PASSWORD'] = ''
+    app.config['MAIL_USERNAME'] = os.environ.get("MAIL_USERNAME")
+    app.config['MAIL_PASSWORD'] = os.environ.get("MAIL_PASSWORD")
     app.config['MAIL_USE_TLS'] = False
     app.config['MAIL_USE_SSL'] = True
     
