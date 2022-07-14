@@ -3,8 +3,8 @@
 
 
 {% block content %}
-<div class="card mx-auto" style="width: 35rem;">
-  <h1 class=" d-flex justify-content-center mx-4">User Registration</h1>
+<div class="card mx-auto" style="width: 40rem;">
+  <h1 class=" d-flex justify-content-center mx-4">Shop User Signup</h1>
   <div class="card-body">
     <form  method="post">
       <div class="row">
@@ -39,6 +39,17 @@
       <input class="form-control" name="dob" id="dob" required>
       </div>
     </div>
+    
+    <div class="row">
+      <div class="col mb-3">
+      <label class="form-label" for="store_name">Store Name</label>
+      <input class="form-control" name="store_name" id="store_name" required>
+      </div>
+      <div class="col mb-3">
+      <label class="form-label" for="description">Description</label>
+      <input class="form-control" name="description" id="description" required>
+      </div>
+    </div>
 
       <div class="row">
       <div class="col mb-3">
@@ -51,9 +62,7 @@
     <div class="col ">
       <input class="btn btn-primary" type="submit" value="Register">
     </div>
-    <div class="col ">
-      <span class="d-flex justify-content-end mt-3"><a href="{{ url_for('auth.shop_user_register') }}"> register as shopuser</a></span>
-    </div>
+    
     </div>
     </form>
   </div>

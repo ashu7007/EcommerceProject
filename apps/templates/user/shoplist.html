@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+
+
+{% block content %}
+<div class="card mx-auto" style="width: 50rem;">
+    
+    <h1 class=" mx-4">{% block title %}Shop List{% endblock %}</h1>
+    
+  <div class="card-body">
+
+    <table class="table">
+        <thead>
+          <tr>
+            <th scope="col">#</th>
+            <th scope="col">user_id</th>
+            <th scope="col">verify user</th>
+            <th scope="col">store_name</th>
+            <th scope="col">description</th>
+            <th scope="col">active</th>
+            <th scope="col">Approve/Reject</th>
+          </tr>
+        </thead>
+        <tbody>
+            
+        {%for sh in shops%}
+          <tr>
+            <th scope="row">{{sh.id}}</th>
+            <td>{{sh.user_id}}</td>
+            <td>NaN</td>
+            <td>{{sh.store_name}}</td>
+            <td>{{sh.description}}</td>
+            <td>{{sh.active}}</td>
+            <td><form class="f" action="{{ url_for('auth.approval_shop',id =sh.id) }}"><input class="btn btn-success" type=submit value="Approve" style="width:100%"></form></td>
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+  
+  <!-- <form method="post">
+    <div class="mb-3">
+      <label class="form-label" for="username">Username</label>
+      <input class="form-control" name="username" id="username" required>
+    </div>
+    <div class="mb-3">
+      <label class="form-label" for="password">Password</label>
+      <input class="form-control" type="password" name="password" id="password" required>
+    </div>
+    <div class="row">
+    <div class="col ">
+      <input class="btn btn-primary" type="submit" value="Log In">
+    </div>
+    <div class="col ">
+      <span class="d-flex justify-content-end mt-3">Forgot <a href="{{ url_for('auth.forgot_password') }}"> password?</a></span>
+    </div>
+    </div>
+    
+  </form> -->
+  </div>
+</div>
+{% endblock %}

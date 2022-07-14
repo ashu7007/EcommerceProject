@@ -1,3 +1,4 @@
+import os
 import datetime
 import functools
 from random import randint
@@ -6,7 +7,7 @@ from flask_mail import Mail, Message
 from flask import (Blueprint, flash, g, redirect, render_template, request, session, url_for)
 from werkzeug.security import check_password_hash, generate_password_hash
 
-from .models import Userdata, OTP
+from .models import Userdata, OTP, Shop
 from dbConfig import db
 
 
@@ -26,9 +27,28 @@ db_session = Session()
 bp = Blueprint('auth', __name__, url_prefix='/auth')
 
 
-@bp.route("/")
-def user_test():
-    return "Hello app is working"
+@bp.route("/shop_approval_list")
+def shop_approval_list():
+    r_user_id = session.get('r_user_id')
+    user = db_session.query(Userdata).get(r_user_id)
+    if user.is_admin:
+        shops = db_session.query(Shop).all()
+        
+        return render_template("user/shoplist.html",shops=shops)
+    return redirect(url_for("auth.login"))
+
+
+@bp.route("/approval_shop/<id>")
+def approval_shop(id):
+    r_user_id = session.get('r_user_id')
+    user = db_session.query(Userdata).get(r_user_id)
+    if user.is_admin:
+        shops = db_session.query(Shop).all()
+        db_session.query(Shop).filter(Shop.id ==id).update({'active': True})
+        db_session.commit()
+        
+        return render_template("user/shoplist.html",shops=shops)
+    return redirect(url_for("auth.login"))
 
 
 
@@ -43,7 +63,7 @@ def register():
         address = request.form['address']
         gender = request.form['gender']
         dob = request.form['dob']
-        user_type = request.form['user_type']
+        # user_type = request.form['user_type']
         error = None
 
         if not username:
@@ -58,8 +78,8 @@ def register():
             error = 'address is required.'
         if not gender:
             error = 'gender is required.'
-        if not user_type or user_type not in ['customer','Shopuser']:
-            error = 'user_type should be customer or Shopuser .'
+        # if not user_type or user_type not in ['customer','Shopuser']:
+        #     error = 'user_type should be customer or Shopuser .'
         elif not dob:
             error = 'dob is required.'
         date =datetime.datetime.now()
@@ -67,8 +87,7 @@ def register():
         if error is None:
             try:
                 user= Userdata(full_name=full_name,email=email,username=username,password=generate_password_hash(password),
-                    address=address,gender=gender,dob=dob,
-                 user_type=user_type,active=False,created_at=date,
+                    address=address,gender=gender,dob=dob,active=False,is_admin=False,is_customer=True,is_shopuser=False,created_at=date,
                  updated_at=date)
                 db_session.add(user)
                 db_session.commit()
@@ -98,6 +117,92 @@ def register():
     return render_template('user/register.html')
 
 
+@bp.route("/shop_user_register",methods=['GET','POST'])
+def shop_user_register():
+
+    if request.method == 'POST':
+        full_name = request.form['full_name']
+        email = request.form['email']
+        username = request.form['username']
+        password = request.form['password']
+        address = request.form['address']
+        gender = request.form['gender']
+        dob = request.form['dob']
+        store_name = request.form['store_name']
+        description = request.form['description']
+        # user_type = request.form['user_type']
+        error = None
+
+        if not username:
+            error = 'Username is required.'
+        if not password:
+            error = 'password is required.'
+        if not full_name:
+            error = 'full name is required.'
+        if not email:
+            error = 'email is required.'
+        if not address:
+            error = 'address is required.'
+        if not gender:
+            error = 'gender is required.'
+        if not store_name:
+            error = 'store name is required.'
+        if not description:
+            error = 'description is required.'
+        
+        elif not dob:
+            error = 'dob is required.'
+        date =datetime.datetime.now()
+
+        if error is None:
+            try:
+                user= Userdata(full_name=full_name,email=email,username=username,password=generate_password_hash(password),
+                    address=address,gender=gender,dob=dob,active=False,is_admin=False,is_customer=False,is_shopuser=True,created_at=date,
+                 updated_at=date)
+                db_session.add(user)
+                db_session.commit()
+                shop_object= Shop(user_id=user.id,store_name=store_name,description=description,active=False,created_at=date,updated_at=date)
+                db_session.add(shop_object)
+                db_session.commit()
+
+            except :
+                raise 
+                # error = f"User {username} is already registered."
+            else:
+                otp = randint(1001,9999)
+                otp_object= OTP(user_id=user.id,otp=otp,created_at=date,updated_at=date)
+                db_session.add(otp_object)
+                db_session.commit()
+
+                #send OTP to user
+                msg = Message(
+                f'your otp is {otp}',
+                sender ='avaish@deqode.com',
+                recipients = [email]
+               )
+                msg.body = f'your otp is {otp}'
+                mail = Mail(current_app)
+                mail.send(msg)
+
+                # send email link to admin for approval
+                msg = Message('Approval Needed for shop',
+                  sender=os.environ.get("MAIL_USERNAME"),
+                  recipients=[os.environ.get("MAIL_USERNAME")])
+                mail = Mail(current_app)
+                format_url = url_for('auth.shop_approval_list', _external=True)
+                msg.body = f"To reset your password, visit the following link: {format_url}"
+                mail.send(msg)
+
+
+                session['r_user_id'] = user.id
+                return render_template('user/confirmEmail.html')
+                # return redirect(url_for("auth.login"))
+
+        flash(error)
+
+    return render_template('user/shopUserRegister.html')
+
+
 @bp.route('/login', methods=('GET', 'POST'))
 def login():
     if request.method == 'POST':
@@ -113,9 +218,7 @@ def login():
 
         if error is None and user.active:
             session.clear()
-            print('setting session',user.id)
             session['r_user_id'] = user.id
-            # return redirect(url_for('index'))
             return render_template('index.html')
         else:
             error= "Please verify your email to login"
@@ -147,23 +250,84 @@ def logout():
     return redirect(url_for("auth.login"))
 
 
+# @app.route("/reset_password", methods=['GET', 'POST'])
+# def reset_request():
+#     if current_user.is_authenticated:
+#         return redirect(url_for('home'))
+#     form = RequestResetForm()
+#     if form.validate_on_submit():
+#         user = User.query.filter_by(email=form.email.data).first()
+#         send_reset_email(user)
+#         flash('An email has been sent with instructions to reset your password.', 'info')
+#         return redirect(url_for('login'))
+#     return render_template('reset_request.html', title='Reset Password', form=form)
+
+
+
+@bp.route("/reset_password/<token>", methods=['GET', 'POST'])
+def reset_token(token):
+    # if current_user.is_authenticated:
+    #     return redirect(url_for('home'))
+    user_id = Userdata.verify_reset_token(token)
+    user = db_session.query(Userdata).get(user_id)
+    if user is None:
+        flash('That is an invalid or expired token', 'warning')
+        return redirect(url_for('reset_request'))
+
+    if request.method == 'POST':
+        password = request.form.get('password')
+        confirm_pass = request.form.get('confirm_pass')
+
+        if password is None:
+            error = 'password is required field.'
+        if confirm_pass is None:
+            error = 'confimr password is required field.'
+        elif password!=confirm_pass:
+            error = 'password dont match.'
+        
+        db_session.query(Userdata).filter(Userdata.id == user.id).update({'password': generate_password_hash(password)})
+        db_session.commit()
+        flash('Your password has been updated! You are now able to log in', 'success')
+        return redirect(url_for('auth.login'))
+    return render_template('user/resetpassword.html')
+
+
+
+
+@bp.route('/forgot_password',methods=['GET','POST'])
+def forgot_password():
+    if request.method == 'POST':
+        username = request.form.get('username')
+        user = db_session.query(Userdata).filter_by(username=username).first()
+        token = user.get_reset_token()
+        msg = Message('Password Reset Request',
+                  sender=os.environ.get("MAIL_USERNAME"),
+                  recipients=[user.email])
+        mail = Mail(current_app)
+        format_url = url_for('auth.reset_token', token=token, _external=True)
+        msg.body = f"To reset your password, visit the following link: {format_url}"
+        mail.send(msg)
+        flash('An email has been sent with instructions to reset your password.', 'info')
+        return redirect(url_for('auth.login'))
+    return render_template('user/forgetpass.html')
+
+
+
 @bp.route('/update_profile',methods=['GET','POST'])
 def update_profile():
     print(request.method)
     if request.method == 'POST':
         full_name = request.form.get('full_name')
-        email = request.form.get('email')
-        username = request.form.get('username')
-        password = request.form.get('password')
+        # email = request.form.get('email')
+        # username = request.form.get('username')
+        # password = request.form.get('password')
         address = request.form.get('address')
         gender = request.form.get('gender')
         dob = request.form.get('dob')
-        user_type = request.form.get('user_type')
         error = None
 
-        print([full_name,email,username,gender])
-        if not username:
-            error = 'username is required.'
+        # if not username:
+        #     error = 'username is required.'
         # if not password:
         #     error = 'password is required.'
         if not full_name:
@@ -174,33 +338,32 @@ def update_profile():
             error = 'address is required.'
         if not gender:
             error = 'gender is required.'
-        if not user_type or user_type not in ['customer','Shopuser']:
-            error = 'user_type should be customer or Shopuser .'
+        # if not user_type or user_type not in ['customer','Shopuser']:
+        #     error = 'user_type should be customer or Shopuser .'
         elif not dob:
             error = 'dob is required.'
         date =datetime.datetime.now()
         print(error)
         if error is None:
             try:
-                user = db_session.query(Userdata).filter(Userdata.username == username)
+                r_user_id = session.get('r_user_id')
+                user = db_session.query(Userdata).get(r_user_id)
                 print(user)
                 update_object = {}
                 if full_name and user.full_name != full_name:
                     update_object["full_name"] = full_name
-                if username and user.username != username:
-                    update_object["username"] = username
-                if password and not check_password_hash(user.password, password):
-                    update_object["password"] = password
+                # if username and user.username != username:
+                #     update_object["username"] = username
+                # if password and not check_password_hash(user.password, password):
+                #     update_object["password"] = password
                 if address and user.address != address:
                     update_object["address"] = address
                 if gender and user.gender != gender:
                     update_object["gender"] = gender
                 if dob and user.dob != dob:
                     update_object["dob"] = dob
-                if user_type and user.user_type != user_type:
-                    update_object["user_type"] = user_type
                 print(update_object)
-                user = db_session.query(Userdata).filter(Userdata.username == username).update(update_object)
+                user = db_session.query(Userdata).filter(Userdata.id == r_user_id).update(update_object)
                 db_session.commit()
                
             except :
@@ -224,12 +387,7 @@ def update_profile():
                 return render_template('index.html')
     
     r_user_id = session.get('r_user_id')
-    print("user",r_user_id)
     user = db_session.query(Userdata).get(r_user_id)
-    
-    print(user)
- 
-
     return render_template('user/updateProfile.html',user=user)
     
 

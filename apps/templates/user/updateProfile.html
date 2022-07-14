@@ -13,15 +13,15 @@
       </div>
       <div class="mb-3">
       <label class="form-label" for="email">Email</label>
-      <input class="form-control" name="email" id="email" value="{{user.email}}" disabled required>
+      <input class="form-control" name="email" id="email"  disabled required>
       </div>
       <div class="mb-3">
       <label class="form-label" for="username">Username</label>
-      <input class="form-control" name="username" id="username" value="{{user.username}}" required>
+      <input class="form-control" name="username" id="username" disabled required>
       </div>
       <div class="mb-3">
-      <label class="form-label" for="password">Change Password</label>
-      <input class="form-control" type="password" name="password" id="password" >
+      <label class="form-label" for="password">Password</label>
+      <input class="form-control" type="password" name="password" id="password" disabled >
       </div>
       <!-- <div class="mb-3">
         <label class="form-label" for="password">Confim Password</label>
@@ -33,19 +33,16 @@
       </div>
       <div class="mb-3">
       <label class="form-label" for="dob">Date of birth</label>
-      <input class="form-control" type="date" name="dob" id="dob"  value="{{user.dob}}" placeholder="{{user.dob}}"  required>
+      <input class="form-control"  name="dob" id="dob"  value="{{user.dob}}" placeholder="{{user.dob}}"  required>
       </div>
       <div class="mb-3">
       <label class="form-label" for="address">Address</label>
       <input class="form-control" name="address" id="address" value="{{user.address}}" required>
       </div>
-      <div class="mb-3">
-      <label class="form-label" for="user_type">User Type</label>
-      <input  class="form-control" name="user_type" id="user_type" value="{{user.user_type}}" required>
-      </div>
+     
 
 
-      <input class="btn btn-primary" type="submit" value="Register">
+      <input class="btn btn-primary" type="submit" value="Update">
     </form>
   </div>
 </div>

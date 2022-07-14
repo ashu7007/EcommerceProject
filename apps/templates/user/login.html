@@ -15,9 +15,17 @@
     </div>
     <div class="mb-3">
       <label class="form-label" for="password">Password</label>
-      <input class="form-control" name="password" id="password" required>
+      <input class="form-control" type="password" name="password" id="password" required>
     </div>
-    <input class="btn btn-primary" type="submit" value="Log In">
+    <div class="row">
+    <div class="col ">
+      <input class="btn btn-primary" type="submit" value="Log In">
+    </div>
+    <div class="col ">
+      <span class="d-flex justify-content-end mt-3">Forgot <a href="{{ url_for('auth.forgot_password') }}"> password?</a></span>
+    </div>
+    </div>
+    
   </form>
   </div>
 </div>
