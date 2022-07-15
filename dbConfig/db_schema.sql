@@ -34,6 +34,7 @@ CREATE TABLE Shop(
    store_name   VARCHAR(255)  NOT NULL,
    description   VARCHAR(255) NOT NULL,
    active    bool  default false,
+   status   VARCHAR(10)  NOT NULL,
    created_at timestamp with time zone NOT NULL,
    updated_at  timestamp with time zone NOT NULL,
    CONSTRAINT fk_User  

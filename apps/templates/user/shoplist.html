@@ -2,7 +2,7 @@
 
 
 {% block content %}
-<div class="card mx-auto" style="width: 50rem;">
+<div class="card mx-auto container" style="width:100%;">
     
     <h1 class=" mx-4">{% block title %}Shop List{% endblock %}</h1>
     
@@ -12,12 +12,14 @@
         <thead>
           <tr>
             <th scope="col">#</th>
-            <th scope="col">user_id</th>
-            <th scope="col">verify user</th>
-            <th scope="col">store_name</th>
-            <th scope="col">description</th>
-            <th scope="col">active</th>
-            <th scope="col">Approve/Reject</th>
+            <th scope="col">User id</th>
+            <th scope="col">Verified user</th>
+            <th scope="col">Store name</th>
+            <th scope="col">Description</th>
+            <th scope="col">Active</th>
+            <th scope="col">Status</th>
+            <th scope="col">Action</th>
+            
           </tr>
         </thead>
         <tbody>
@@ -26,15 +28,64 @@
           <tr>
             <th scope="row">{{sh.id}}</th>
             <td>{{sh.user_id}}</td>
-            <td>NaN</td>
+            <td>True</td>
             <td>{{sh.store_name}}</td>
             <td>{{sh.description}}</td>
             <td>{{sh.active}}</td>
-            <td><form class="f" action="{{ url_for('auth.approval_shop',id =sh.id) }}"><input class="btn btn-success" type=submit value="Approve" style="width:100%"></form></td>
+            <td>{{sh.status}}</td>
+            <td>
+                <div class="row">
+                    <div class="col">
+                        <form class="f" action="{{ url_for('auth.approval_shop',id =sh.id) }}">
+                            <!-- <input hidden name="status" value="True" > -->
+                            <input class="btn btn-success btn-sm" type=submit value="Approve" style="width:100%">
+                            </form>
+                    </div>
+                    <div class="col">
+                        <button type="button" class="btn btn-danger btn-sm" data-toggle="modal" data-target="#{{sh.id}}" data-whatever="@mdo">Reject</button>
+                        <!-- <input class="btn btn-danger btn-sm mx-1" type=submit value="Reject" style="width:100%"> -->
+                        </div>
+                </div>
+               
+                </td>
           </tr>
+
+
+          <!-- Modal -->
+  <div class="modal fade" id="{{sh.id}}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">{{sh.store_name}}</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body ">
+          <form action="{{ url_for('auth.reject_shop',id =sh.id) }}" method="post">
+            <div class="form-group">
+              <label for="message-text" class="col-form-label">Rejection reason:</label>
+              <textarea class="form-control" name="message" id="message-text"></textarea>
+            
+            </div>
+            <div class="my-3">
+            <button type="button " class="btn btn-secondary btn-sm" data-dismiss="modal">Close</button>
+            <input class="btn btn-danger btn-sm" type=submit value="Reject and Send" >
+            </div>
+        
+          </form>
+        </div>
+        <div class="modal-footer">
+          
+      </div>
+    </div>
+  </div>
+
         {% endfor %}
+        
         </tbody>
       </table>
+    
   
   <!-- <form method="post">
     <div class="mb-3">
@@ -57,4 +108,9 @@
   </form> -->
   </div>
 </div>
+<script>
+    $('#myModal').on('shown.bs.modal', function () {
+  $('#myInput').trigger('focus')
+})
+</script>
 {% endblock %}
