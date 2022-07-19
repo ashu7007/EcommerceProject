@@ -8,6 +8,7 @@ from flask import (Blueprint, flash, g, redirect, render_template, request, sess
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from .models import Userdata, OTP, Shop, ShopRejection
+from apps.products.models import Product
 
 from dbConfig import db
 
@@ -35,6 +36,11 @@ def shop_approval_list():
 
         return render_template("user/shoplist.html", shops=shops)
     return redirect(url_for("auth.login"))
+
+@bp.route("/product_list")
+def product_list():
+    products = db_session.query(Product).all()
+    return render_template("index.html", products=products)
 
 
 @bp.route("/approval_shop/<id>")
@@ -129,7 +135,7 @@ def register():
                 db_session.add(otp_object)
                 db_session.commit()
                 msg = Message(
-                    f'your otp is {otp}',
+                  f'your otp is {otp}',
                     sender='avaish@deqode.com',
                     recipients=[email]
                 )
@@ -247,7 +253,7 @@ def login():
         elif error is None and user.active and user.is_customer:
             session.clear()
             session['r_user_id'] = user.id
-            return render_template('index.html')
+            return redirect(url_for("auth.product_list"))
 
         elif error is None and user.active and user.is_admin:
             session.clear()
@@ -260,7 +266,7 @@ def login():
             if shop.active:
                 session.clear()
                 session['r_user_id'] = user.id
-                return render_template('shopDashboard.html')
+                return redirect(url_for("product.shop_dashboard"))
             else:
                 error = "your shop is not approved yet"
 
@@ -354,7 +360,6 @@ def forgot_password():
 
 @bp.route('/update_profile', methods=['GET', 'POST'])
 def update_profile():
-    print(request.method)
     if request.method == 'POST':
         full_name = request.form.get('full_name')
         # email = request.form.get('email')

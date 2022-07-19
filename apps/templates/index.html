@@ -6,36 +6,20 @@
 {% block content %}
 <div class="container">
 <div class="row mx-auto">
+
+{% for prod in products %}
 <div class="col">
   <div class="card" style="width: 18rem;">
     <img src="https://cdn5.vectorstock.com/i/1000x1000/10/89/green-logo-for-100-natural-products-vector-5591089.jpg" class="card-img-top" alt="...">
     <div class="card-body">
-      <h5 class="card-title">Product A</h5>
-      <p class="card-text">price 100$</p>
+      <h5 class="card-title">{{prod.product_name}}</h5>
+      <p class="card-text">{{prod.price}}$</p>
       <a href="#" class="btn btn-primary">Buy now</a>
     </div>
   </div>
 </div>
-<div class="col">
-  <div class="card" style="width: 18rem;">
-    <img src="https://cdn5.vectorstock.com/i/1000x1000/10/89/green-logo-for-100-natural-products-vector-5591089.jpg" class="card-img-top" alt="...">
-    <div class="card-body">
-      <h5 class="card-title">Product B</h5>
-      <p class="card-text">price 100$</p>
-      <a href="#" class="btn btn-primary">Buy now</a>
-    </div>
-  </div>
-</div>
-<div class="col">
-  <div class="card" style="width: 18rem;">
-    <img src="https://cdn5.vectorstock.com/i/1000x1000/10/89/green-logo-for-100-natural-products-vector-5591089.jpg" class="card-img-top" alt="...">
-    <div class="card-body">
-      <h5 class="card-title">Product C</h5>
-      <p class="card-text">price 100$</p>
-      <a href="#" class="btn btn-primary">Buy now</a>
-    </div>
-  </div>
-</div>
+{% endfor %}
+
 </div>
 </div>
 {% endblock %}

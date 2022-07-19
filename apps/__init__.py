@@ -35,15 +35,18 @@ def create_app():
     from apps.users import view
     app.register_blueprint(view.bp)
 
-    # from apps.products import view
-    # app.register_blueprint(view.product_bp)
-    from apps.shop.views import ShopAPI ,AdminShop
-    shop_view = ShopAPI.as_view('shop_api')
-    app.add_url_rule('/shop/', defaults={'id': None},
-                    view_func=shop_view, methods=['GET',])
+    from apps.shop import views
+    app.register_blueprint(views.bp)
+
+    from apps.products import views
+    app.register_blueprint(views.prod_bp)
+    # from apps.shop.views import ShopAPI ,AdminShop
+    # shop_view = ShopAPI.as_view('shop_api')
+    # app.add_url_rule('/shop/', defaults={'id': None},
+    #                 view_func=shop_view, methods=['GET',])
     #app.add_url_rule('/shop/','shop' ,view_func=shop_view, methods=['POST',])
-    app.add_url_rule('/shop/<id>','shop', view_func=shop_view,
-                    methods=['GET', 'PUT', 'DELETE'])
-    app.add_url_rule('/addshop', 'addshop',view_func=AdminShop.as_view('admin_shop'))
+    # app.add_url_rule('/shop/<id>','shop', view_func=shop_view,
+    #                 methods=['GET', 'PUT', 'DELETE'])
+    # app.add_url_rule('/addshop', 'addshop',view_func=AdminShop.as_view('admin_shop'))
 
     return app

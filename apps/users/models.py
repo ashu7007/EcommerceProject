@@ -21,6 +21,7 @@ class Userdata(db.Model):
     is_shopuser = db.Column(db.Boolean, nullable=False)
     created_at = db.Column(db.DateTime)
     updated_at = db.Column(db.DateTime)
+    shop = db.relationship('Shop', backref='shops',lazy=True)
 
     def get_reset_token(self, expires_sec=300):
         s = Serializer(current_app.config['SECRET_KEY'], expires_sec)
@@ -61,6 +62,8 @@ class Shop(db.Model):
     status = db.Column(db.String(10), nullable=False)
     created_at = db.Column(db.DateTime)
     updated_at = db.Column(db.DateTime)
+    # user = db.relationship(Userdata, backref='shops')
+    
 
     def __repr__(self):
         return f"'{self.id}','{self.store_name}'"
