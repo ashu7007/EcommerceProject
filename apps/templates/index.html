@@ -6,19 +6,29 @@
 {% block content %}
 <div class="container">
 <div class="row mx-auto">
+  
 
-{% for prod in products %}
-<div class="col">
-  <div class="card" style="width: 18rem;">
+
+
+<div class="row">
+  {% for prod in products %}
+  <div class="col-4 my-3">
+  <div class="card" >
     <img src="https://cdn5.vectorstock.com/i/1000x1000/10/89/green-logo-for-100-natural-products-vector-5591089.jpg" class="card-img-top" alt="...">
     <div class="card-body">
       <h5 class="card-title">{{prod.product_name}}</h5>
       <p class="card-text">{{prod.price}}$</p>
-      <a href="#" class="btn btn-primary">Buy now</a>
+      <a href="{{ url_for('auth.add_wishlist', prod_id=prod.id) }}" class="col btn btn-warning btn-sm mb-2" style="width:100%;">add to Wishlist</a>
+      <a href="#" class="col btn btn-danger btn-sm" style="width:100%;">Buy now</a>
     </div>
   </div>
 </div>
-{% endfor %}
+  {% endfor %}
+</div>
+
+
+
+
 
 </div>
 </div>

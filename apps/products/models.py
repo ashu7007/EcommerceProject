@@ -41,3 +41,17 @@ class Product(db.Model):
     def __repr__(self):
         return f"product name :'{self.product_name}')"
     
+    def __init__(self,category_id,product_name,brand,price):
+        self.category_id = category_id
+        self.product_name = product_name
+        self.brand = brand
+        self.price = price
+
+    def format(self):
+        return {
+        'id': self.id,
+        'category_id': self.category_id,
+        'product_name': self.product_name,
+        'brand': self.brand,
+        'price': self.price,
+        }

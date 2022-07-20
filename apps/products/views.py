@@ -110,3 +110,47 @@ def delete(id):
         db_session.commit()
         return redirect(url_for("product.shop_dashboard"))
     return redirect(url_for("product.shop_dashboard"))
+
+
+@prod_bp.route('/update_product/<id>', methods=('GET','POST'))
+def update_product(id):
+    r_user_id = session.get('r_user_id')
+    user = db_session.query(Userdata).get(r_user_id)
+
+    if user.is_shopuser or user.is_admin:
+        category_id = request.form.get('category_id')
+        product_name = request.form.get('product_name')
+        stock_quantity = request.form.get('stock_quantity')
+        brand = request.form.get('brand')
+        price = request.form.get('price')
+        
+        error = None
+
+        if not category_id:
+            error = 'category is required.'
+        if not product_name:
+            error = 'password is required.'
+        if not stock_quantity:
+            error = 'full name is required.'
+        if not brand:
+            error = 'address is required.'
+        if not price:
+            error = 'gender is required.'
+        date = datetime.datetime.now()
+        product = db_session.query(Product).get(id)
+        update_object = {}
+        if category_id and product.category_id != category_id:
+            update_object["category_id"] = category_id
+        if product_name and product.product_name != product_name:
+            update_object["product_name"] = product_name
+        if stock_quantity and product.stock_quantity != stock_quantity:
+            update_object["stock_quantity"] = stock_quantity
+        if brand and product.brand != brand:
+            update_object["brand"] = brand
+        if price and product.price != price:
+            update_object["price"] = price
+
+        db_session.query(Product).filter(Product.id == id).update(update_object)
+        db_session.commit()
+        return redirect(url_for("product.shop_dashboard"))
+    return redirect(url_for("product.shop_dashboard"))

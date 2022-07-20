@@ -4,10 +4,11 @@ import functools
 from random import randint
 from flask import current_app
 from flask_mail import Mail, Message
+from flask import jsonify
 from flask import (Blueprint, flash, g, redirect, render_template, request, session, url_for)
 from werkzeug.security import check_password_hash, generate_password_hash
 
-from .models import Userdata, OTP, Shop, ShopRejection
+from .models import Userdata, OTP, Shop, ShopRejection, Wishlist
 from apps.products.models import Product
 
 from dbConfig import db
@@ -39,8 +40,68 @@ def shop_approval_list():
 
 @bp.route("/product_list")
 def product_list():
+    #page = request.args.get('page', 1, type=int)
+    # posts = Post.query.order_by(Post.date_posted.desc()).paginate(page=page, per_page=5)
+    #products = db_session.query(Product).paginate(page=page, per_page=5)
+    
+    
     products = db_session.query(Product).all()
+
+    # results = [product.format() for product in products]
+    # print(results)
+    # print(len(results))
+    # return jsonify({
+    # 'success':True,
+    # 'results':results,
+    # 'count':len(results)
+    # })
+    print(products)
     return render_template("index.html", products=products)
+
+@bp.route("/wishlist", methods=['POST','GET'])
+def wishlist():
+    r_user_id = session.get('r_user_id')
+    user = db_session.query(Userdata).get(r_user_id)
+    if user.is_customer:
+        wl = db_session.query(Wishlist).filter(Wishlist.user_id==r_user_id).first()
+        if wl:
+            return render_template("user/wishlish.html", wishlist=wl)
+        else:
+            return redirect(url_for("auth.product_list"))
+
+
+@bp.route("/add_wishlist/<prod_id>", methods=['POST','GET'])
+def add_wishlist(prod_id):
+    
+    print("wishlist:",request.method)
+    r_user_id = session.get('r_user_id')
+    user = db_session.query(Userdata).get(r_user_id)
+    date = datetime.datetime.now()
+    print("wishlist:",prod_id)
+    if user.is_customer and prod_id:
+        wl = db_session.query(Wishlist).filter(Wishlist.user_id==r_user_id).first()
+        print(wl)
+        if not wl:
+            wishlist = Wishlist(user_id=user.id, product_id=[prod_id],created_at=date,
+                                   updated_at=date)
+            db_session.add(wishlist)
+            db_session.commit()
+        else:
+            wl_id=wl.product_id
+            print(type(wl_id))
+            print(wl_id)
+            wl_id.append(int(prod_id))
+            print(wl_id)
+            db_session.query(Wishlist).filter(Wishlist.id == wl.id).update({'product_id': wl_id })
+            db_session.commit()
+        wl = db_session.query(Wishlist).filter(Wishlist.user_id==r_user_id).first()
+        return redirect(url_for("auth.product_list"))
+    return redirect(url_for("auth.login"))
+
+@bp.route("/user_list")
+def user_list():
+    users = db_session.query(Userdata).filter(Userdata.is_customer==True)
+    return render_template("user/userlist.html", users=users)
 
 
 @bp.route("/approval_shop/<id>")
@@ -258,8 +319,9 @@ def login():
         elif error is None and user.active and user.is_admin:
             session.clear()
             session['r_user_id'] = user.id
-            shops = db_session.query(Shop).all()
-            return render_template("user/shoplist.html", shops=shops)
+            # shops = db_session.query(Shop).all()
+            return redirect(url_for("shop.list_shop"))
+            # return render_template("user/shoplist.html", shops=shops)
 
         elif error is None and user.active and user.is_shopuser:
             shop = db_session.query(Shop).filter(Shop.user_id == user.id).first()

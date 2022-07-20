@@ -14,7 +14,8 @@ CREATE TABLE userdata(
    is_customer bool  default false,
    is_shopuser bool  default false,
    created_at timestamp with time zone NOT NULL,
-   updated_at  timestamp with time zone NOT NULL );
+   updated_at  timestamp with time zone NOT NULL,
+   );
 
 
 CREATE TABLE otp (
@@ -90,4 +91,15 @@ CREATE TABLE Product(
    CONSTRAINT fk_category 
    FOREIGN KEY(category_id)   
    REFERENCES Category(id) );
+
+
+CREATE TABLE Wishlist(
+   id  SERIAL   PRIMARY KEY,
+   user_id int NOT NULL,
+   product_id int [] NOT NULL,
+   created_at timestamp with time zone NOT NULL,
+   updated_at  timestamp with time zone NOT NULL,
+   CONSTRAINT fk_User  
+   FOREIGN KEY(user_id)   
+   REFERENCES userdata(id) );
 

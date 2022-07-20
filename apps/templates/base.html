@@ -12,12 +12,31 @@
     
     <!-- data tables -->
     <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.12.1/css/jquery.dataTables.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+
     <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.12.1/js/jquery.dataTables.js"></script>
+
+
     
+
+
+
+
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js" integrity="sha384-vFJXuSJphROIrBnz7yo7oB41mKfc8JzQZiCq4NCceLEaO4IHwicKwpJf9c9IpFgh" crossorigin="anonymous"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js" integrity="sha384-alpBpkh1PFOepccYVYDB4do5UnbKysX5WZXm3XxPqe5iKTfUKjNkCk9SaVuEZflJ" crossorigin="anonymous"></script>
+    <script src="{{url_for('static', filename='js/main.js')}}"></script>
+    <script src="{{url_for('static', filename='js/jquery-3.6.0.min.js')}}"></script>
+  
+  
+  
+    <link rel="stylesheet" type="text/css" href="http://ajax.aspnetcdn.com/ajax/jquery.dataTables/1.9.0/css/jquery.dataTables.css">
+    <link rel="stylesheet" type="text/css" href="http://ajax.aspnetcdn.com/ajax/jquery.dataTables/1.9.0/css/jquery.dataTables_themeroller.css">
+    <script type="text/javascript" charset="utf8" src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.7.1.min.js"></script>
+    <script type="text/javascript" charset="utf8" src="http://ajax.aspnetcdn.com/ajax/jquery.dataTables/1.9.0/jquery.dataTables.min.js"></script>
+
+  
   </head>
   <body>
     
@@ -60,15 +79,177 @@
 
     
 
-<section class="content my-4">
-    <header>
-      {% block header %}{% endblock %}
-    </header>
-    {% for message in get_flashed_messages() %}
-      <div class="flash d-flex justify-content-center text-danger">{{ message }}</div>
-    {% endfor %}
-    {% block content %}{% endblock %}
-  </section>
+     <div class="row">
+      {% if g.user %}
+      <div class="col-3 mb-1">
+        <div class="sidebar">
+          <div class="logo-details">
+            <i class='bx bxl-c-plus-plus'></i>
+            <span class="logo_name">Shop Online</span>
+          </div>
+          <ul class="nav-links">
+            <li>
+              <a href="#">
+                <i class='bx bx-grid-alt'></i>
+                <span class="link_name">Dashboard</span>
+              </a>
+              <ul class="sub-menu blank">
+                <li><a class="link_name" href="#">Dashboard</a></li>
+              </ul>
+            </li>
+            <li>
+              <div class="icon-link">
+                <a href="#">
+                  <i class='bx bx-collection'></i>
+                  <span class="link_name">Category</span>
+                </a>
+                <i class='bx bxs-chevron-down arrow'></i>
+              </div>
+              <ul class="sub-menu">
+                <li><a class="link_name" href="#">Category</a></li>
+                <li><a href="#">HTML & CSS</a></li>
+                <li><a href="#">JavaScript</a></li>
+                <li><a href="#">PHP & MySQL</a></li>
+              </ul>
+            </li>
+            <li>
+              <div class="icon-link">
+                <a href="#">
+                  <i class='bx bx-book-alt'></i>
+                  <span class="link_name">Products</span>
+                </a>
+                <i class='bx bxs-chevron-down arrow'></i>
+              </div>
+              <ul class="sub-menu">
+                <li><a class="link_name" href="#">Products</a></li>
+                <li><a href="#">Web Design</a></li>
+                <li><a href="#">Login Form</a></li>
+                <li><a href="#">Card Design</a></li>
+              </ul>
+            </li>
+            {% if g.user.is_customer %}
+            <li>
+              <div class="icon-link">
+                <a href="{{ url_for('auth.wishlist') }}">
+                  <i class='bx bx-book-alt'></i>
+                  <span class="link_name">Wishlist</span>
+                </a>
+                <i class='bx bxs-chevron-down arrow'></i>
+              </div>
+              <ul class="sub-menu">
+                <li><a class="link_name" href="#">Wishlist</a></li>
+                <li><a href="#">Web Design</a></li>
+                <li><a href="#">Login Form</a></li>
+                <li><a href="#">Card Design</a></li>
+              </ul>
+            </li>
+            <li>
+              <div class="icon-link">
+                <a href="#">
+                  <i class='bx bx-book-alt'></i>
+                  <span class="link_name">Orders</span>
+                </a>
+                <i class='bx bxs-chevron-down arrow'></i>
+              </div>
+              <ul class="sub-menu">
+                <li><a class="link_name" href="#">Orders</a></li>
+                <li><a href="#">Web Design</a></li>
+                <li><a href="#">Login Form</a></li>
+                <li><a href="#">Card Design</a></li>
+              </ul>
+            </li>
+            {% endif %}
+
+            {% if g.user.is_shopuser %}
+            
+            <li>
+              <div class="icon-link">
+                <a href="#">
+                  <i class='bx bx-book-alt'></i>
+                  <span class="link_name">Orders</span>
+                </a>
+                <i class='bx bxs-chevron-down arrow'></i>
+              </div>
+              <ul class="sub-menu">
+                <li><a class="link_name" href="#">Orders</a></li>
+                <li><a href="#">Web Design</a></li>
+                <li><a href="#">Login Form</a></li>
+                <li><a href="#">Card Design</a></li>
+              </ul>
+            </li>
+            {% endif %}
+            {% if g.user.is_admin %}
+            <li>
+              <div class="icon-link">
+                <a href="#">
+                  <i class='bx bx-book-alt'></i>
+                  <span class="link_name">Orders</span>
+                </a>
+                <i class='bx bxs-chevron-down arrow'></i>
+              </div>
+              <ul class="sub-menu">
+                <li><a class="link_name" href="#">Orders</a></li>
+                <li><a href="#">Web Design</a></li>
+                <li><a href="#">Login Form</a></li>
+                <li><a href="#">Card Design</a></li>
+              </ul>
+            </li>
+            <li>
+              <div class="icon-link">
+                <a href="{{ url_for('auth.user_list') }}">
+                  <i class='bx bx-book-alt'></i>
+                  <span class="link_name">Users</span>
+                </a>
+                <i class='bx bxs-chevron-down arrow'></i>
+              </div>
+              <ul class="sub-menu">
+                <li><a class="link_name" href="#">Users</a></li>
+                <li><a href="#">Web Design</a></li>
+                <li><a href="#">Login Form</a></li>
+                <li><a href="#">Card Design</a></li>
+              </ul>
+            </li>
+            <li>
+              <div class="icon-link">
+                <a href="{{ url_for('shop.list_shop') }}">
+                  <i class='bx bx-book-alt'></i>
+                  <span class="link_name">Shop</span>
+                </a>
+                <i class='bx bxs-chevron-down arrow'></i>
+              </div>
+              <ul class="sub-menu">
+                <li><a class="link_name" href="#">Shop</a></li>
+                <li><a href="#">Web Design</a></li>
+                <li><a href="#">Login Form</a></li>
+                <li><a href="#">Card Design</a></li>
+              </ul>
+            </li>
+            {% endif %}
+            
+            
+          </ul>
+        </div>
+        
+      </div>
+      <div class="col-8">
+      {% else %}
+      <div class="col-12 container-fluid">
+        {% endif %}
+        
+
+        <section class="content my-4">
+          <header>
+            {% block header %}{% endblock %}
+          </header>
+          {% for message in get_flashed_messages() %}
+            <div class="flash d-flex justify-content-center text-danger">{{ message }}</div>
+          {% endfor %}
+          {% block content %}{% endblock %}
+        </section>
+      </div>
+     </div>
+
+
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/js/bootstrap.bundle.min.js" integrity="sha384-pprn3073KE6tl6bjs2QrFaJGz5/SUsLqktiwsUTF55Jfv3qYSDhgCecCxMW52nD2" crossorigin="anonymous"></script>
   </body>

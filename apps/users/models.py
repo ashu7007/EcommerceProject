@@ -22,6 +22,8 @@ class Userdata(db.Model):
     created_at = db.Column(db.DateTime)
     updated_at = db.Column(db.DateTime)
     shop = db.relationship('Shop', backref='shops',lazy=True)
+    # wishlist = db.relationship("Wishlist", back_populates="user")
+
 
     def get_reset_token(self, expires_sec=300):
         s = Serializer(current_app.config['SECRET_KEY'], expires_sec)
@@ -38,6 +40,18 @@ class Userdata(db.Model):
 
     def __repr__(self):
         return f"User('{self.email}','{self.username}')"
+
+
+class Wishlist(db.Model):
+    __tablename__ = 'wishlist'
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('userdata.id'))
+    product_id = db.Column(db.ARRAY(db.Integer), nullable=True)
+    created_at = db.Column(db.DateTime)
+    updated_at = db.Column(db.DateTime)
+
+    def __repr__(self):
+        return f"wishlist'{self.id}')"
 
 
 class OTP(db.Model):
