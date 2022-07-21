@@ -3,6 +3,9 @@ $(document).ready( function () {
     
 } );
 
+// wishlist button 
+
+
 
 
 let arrow = document.querySelectorAll(".arrow");

@@ -4,18 +4,14 @@
 {% block content %}
 
 <div class="row">
-    <div class="col d-flex justify-content-start mx-4  ">
-        <a href="{{ url_for('auth.shop_approval_list') }}" >
-            <input class="btn btn-secondary btn-sm mb-4" type=submit value="Shop Request" >
-        </a>
-    </div>
-    <div class=" col d-flex justify-content-end mx-4  ">
-        <a href="{{ url_for('shop.create_shop') }}" >
-            <input class="btn btn-secondary btn-sm mx-4" type=submit value="Add Shop" >
+    <div class=" col d-flex justify-content-end  mb-2 ">
+        <a href="{{ url_for('auth.add_user') }}" >
+            <input class="btn btn-secondary btn-sm " type=submit value="Add User" >
         </a>
     </div>
 </div>
-<table id="table_id" class=" display table container">
+
+<table id="table_id" class=" display table ">
         <thead>
             <tr>
                 <th scope="col">User id</th>
@@ -23,8 +19,7 @@
                 <th scope="col">username</th>
                 <th scope="col">email</th>
                 <th scope="col">active</th>
-                <th scope="col">customer</th>
-                <th scope="col">shop user</th>
+                <th scope="col">is shopuser</th>
                 <th scope="col">Action</th>
                 
               </tr>
@@ -36,9 +31,9 @@
               <th scope="row">{{sh.id}}</th>
               <td>{{sh.full_name}}</td>
               <td>{{sh.username}}</td>
-              <td>{{sh.email}}</td>
+              <td><small>{{sh.email}}</small></td>
               <td>{{sh.active}}</td>
-              <td>{{sh.is_customer}}</td>
+              
               <td>{{sh.is_shopuser}}</td>
               <td>
                   <div class="row">

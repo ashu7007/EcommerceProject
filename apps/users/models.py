@@ -1,9 +1,11 @@
 import datetime
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 from flask import current_app
+from apps import db_sql
+from sqlalchemy.dialects.postgresql import JSON
+# from dbConfig.db import db
 
-from dbConfig.db import db
-
+db = db_sql
 
 class Userdata(db.Model):
     __tablename__ = 'userdata'
@@ -52,6 +54,18 @@ class Wishlist(db.Model):
 
     def __repr__(self):
         return f"wishlist'{self.id}')"
+
+
+class Cart(db.Model):
+    __tablename__ = 'cart'
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('userdata.id'))
+    items = db.Column(JSON)
+    created_at = db.Column(db.DateTime)
+    updated_at = db.Column(db.DateTime)
+
+    def __repr__(self):
+        return f"Cart'{self.id}')"
 
 
 class OTP(db.Model):

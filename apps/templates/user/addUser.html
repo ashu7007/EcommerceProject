@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+
+
+
+{% block content %}
+<div class="card mx-auto" style="width: 35rem;">
+  <h1 class=" d-flex justify-content-center mx-4">Add User</h1>
+  <div class="card-body">
+    <form  method="post" action="{{ url_for('auth.add_user') }}">
+      <div class="row">
+        <div class="col mb-3">
+          <label class="form-label" for="full_name">Full Name</label>
+          <input class="form-control" name="full_name" id="full_name" required>
+        </div>
+        <div class="col mb-3">
+          <label class="form-label" for="email">Email</label>
+          <input class="form-control" name="email" id="email" required>
+        </div>
+       </div>
+
+       <div class="row">
+      <div class="col mb-3">
+      <label class="form-label" for="username">Username</label>
+      <input class="form-control" name="username" id="username" required>
+      </div>
+      <div class="col mb-3">
+      <label class="form-label" for="password">Password</label>
+      <input class="form-control" type="password" name="password" id="password" required>
+      </div>
+    </div>
+
+      <div class="row">
+      <div class="col mb-3">
+      <label class="form-label" for="gender">Gender</label>
+      <input class="form-control" name="gender" id="gender" required>
+      </div>
+      <div class="col mb-3">
+      <label class="form-label" for="dob">Date of birth</label>
+      <input class="form-control" name="dob" id="dob" required>
+      </div>
+    </div>
+
+      <div class="row">
+      <div class="col mb-3">
+      <label class="form-label" for="address">Address</label>
+      <input class="form-control" name="address" id="address" required>
+      </div>
+    </div>
+      
+    <div class="d-flex justify-content-center row mt-2">
+    <div class="col-6 ">
+      <input class="btn btn-primary" type="submit" value="Add" style="width:100% ;">
+    </div>
+    <!-- <div class="col ">
+      <span class="d-flex justify-content-end mt-3"><a href="{{ url_for('auth.shop_user_register') }}"> register as shopuser</a></span>
+    </div> -->
+    </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

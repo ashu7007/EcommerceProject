@@ -9,7 +9,7 @@
     <title>{% block title %}{% endblock %} - shop</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-0evHe/X+R7YkIZDRvuzKMRqM+OrBnVFBL6DOitfPri4tjfHxaWutUpFmBp4vmVor" crossorigin="anonymous">
-    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <!-- data tables -->
     <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.12.1/css/jquery.dataTables.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
@@ -138,6 +138,21 @@
               </div>
               <ul class="sub-menu">
                 <li><a class="link_name" href="#">Wishlist</a></li>
+                <li><a href="#">Web Design</a></li>
+                <li><a href="#">Login Form</a></li>
+                <li><a href="#">Card Design</a></li>
+              </ul>
+            </li>
+            <li>
+              <div class="icon-link">
+                <a href="{{ url_for('auth.cart') }}">
+                  <i class='bx bx-book-alt'></i>
+                  <span class="link_name">Cart</span>
+                </a>
+                <i class='bx bxs-chevron-down arrow'></i>
+              </div>
+              <ul class="sub-menu">
+                <li><a class="link_name" href="#">Cart</a></li>
                 <li><a href="#">Web Design</a></li>
                 <li><a href="#">Login Form</a></li>
                 <li><a href="#">Card Design</a></li>

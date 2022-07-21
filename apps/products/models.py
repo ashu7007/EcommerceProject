@@ -1,8 +1,10 @@
 import datetime
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 from flask import current_app
+from apps import db_sql
+# from dbConfig.db import db
 
-from dbConfig.db import db
+db = db_sql
 
 
 class Category(db.Model):
@@ -36,16 +38,16 @@ class Product(db.Model):
     active = db.Column(db.Boolean, nullable=False)
     created_at = db.Column(db.DateTime)
     updated_at = db.Column(db.DateTime)
-    
+    rating = db.relationship('Rating', backref='rating_person', lazy=True)
 
     def __repr__(self):
         return f"product name :'{self.product_name}')"
     
-    def __init__(self,category_id,product_name,brand,price):
-        self.category_id = category_id
-        self.product_name = product_name
-        self.brand = brand
-        self.price = price
+    # def __init__(self,category_id,product_name,brand,price):
+    #     self.category_id = category_id
+    #     self.product_name = product_name
+    #     self.brand = brand
+    #     self.price = price
 
     def format(self):
         return {
@@ -55,3 +57,19 @@ class Product(db.Model):
         'brand': self.brand,
         'price': self.price,
         }
+
+
+class Rating(db.Model):
+    __tablename__ = 'rating'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('userdata.id'))
+    product_id = db.Column(db.Integer, db.ForeignKey('product.id'))
+    rating = db.Column(db.Integer,nullable=False)
+    review = db.Column(db.String(255), nullable=False)
+    created_at = db.Column(db.DateTime)
+    updated_at = db.Column(db.DateTime)
+    
+
+    def __repr__(self):
+        return f"rating :'{self.review}')"

@@ -17,7 +17,8 @@ from sqlalchemy import create_engine, desc
 from sqlalchemy.orm import sessionmaker, scoped_session
 
 
-some_engine = create_engine('postgresql+psycopg2://admin:admin@localhost/ecommerce')
+# some_engine = create_engine('postgresql+psycopg2://admin:admin@localhost/ecommerce')
+some_engine = create_engine('postgresql+psycopg2://admin:admin@localhost:5432/testShop')
 Session = sessionmaker(bind=some_engine)
 db_session = Session()
 

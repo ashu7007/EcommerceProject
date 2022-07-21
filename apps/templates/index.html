@@ -1,35 +1,55 @@
 {% extends 'base.html' %}
 {% block header %}
-  <h1 class="d-flex justify-content-center">{% block title %}Dashboard{% endblock %}</h1>
+  <h1 class="d-flex justify-content-center ">{% block title %}Happy shopping{% endblock %}</h1>
 {% endblock %}
 
 {% block content %}
-<div class="container">
+<div class="container-fluid">
 <div class="row mx-auto">
-  
-
-
-
-<div class="row">
-  {% for prod in products %}
+  {% for prod in products.items %}
   <div class="col-4 my-3">
   <div class="card" >
-    <img src="https://cdn5.vectorstock.com/i/1000x1000/10/89/green-logo-for-100-natural-products-vector-5591089.jpg" class="card-img-top" alt="...">
+    <img src="{{url_for('static', filename='image/product.jpg')}}" class="card-img-top" alt="...">
     <div class="card-body">
       <h5 class="card-title">{{prod.product_name}}</h5>
-      <p class="card-text">{{prod.price}}$</p>
-      <a href="{{ url_for('auth.add_wishlist', prod_id=prod.id) }}" class="col btn btn-warning btn-sm mb-2" style="width:100%;">add to Wishlist</a>
-      <a href="#" class="col btn btn-danger btn-sm" style="width:100%;">Buy now</a>
+      <div class="row">
+        <div class="col"><p class="card-text">{{prod.price}}$</p></div>
+        <div class="col">
+          <span class="d-flex justify-content-end fa fa-star checkedstar">5/5</span>
+        </div>
+
+      </div>
+      
+        <div class="col">      
+          <a href="{{ url_for('auth.add_wishlist', prod_id=prod.id) }}" class="col btn btn-warning btn-sm mb-2" style="width:100%;">Add to Wishlist</a>
+        </div>
+    <div class="row">
+        <div class="col">
+          <a href="{{ url_for('auth.add_cart', prod_id=prod.id) }}" class="col btn btn-info btn-sm mb-2" style="width:100%;"><span>AddtoCart</span></a>
+        </div>
+        <div class="col">
+          <a href="#" class="col btn btn-danger btn-sm" style="width:100%;">Buy now</a>
+
+        </div>
+    </div>
     </div>
   </div>
 </div>
   {% endfor %}
+ 
 </div>
-
-
-
-
-
+<div class="mx-auto">
+{% for page_num in products.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=2) %}
+{% if page_num %}
+  {% if products.page == page_num %}
+    <a class="btn btn-info mb-4" href="{{ url_for('auth.product_list', page=page_num) }}">{{ page_num }}</a>
+  {% else %}
+    <a class="btn btn-outline-info mb-4" href="{{ url_for('auth.product_list', page=page_num) }}">{{ page_num }}</a>
+  {% endif %}
+{% else %}
+  ...
+{% endif %}
+{% endfor %}
 </div>
 </div>
 {% endblock %}

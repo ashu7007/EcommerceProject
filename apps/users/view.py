@@ -8,7 +8,7 @@ from flask import jsonify
 from flask import (Blueprint, flash, g, redirect, render_template, request, session, url_for)
 from werkzeug.security import check_password_hash, generate_password_hash
 
-from .models import Userdata, OTP, Shop, ShopRejection, Wishlist
+from .models import Userdata, OTP, Shop, ShopRejection, Wishlist, Cart
 from apps.products.models import Product
 
 from dbConfig import db
@@ -16,8 +16,8 @@ from dbConfig import db
 from sqlalchemy import create_engine, desc
 from sqlalchemy.orm import sessionmaker, scoped_session
 
-# some_engine = create_engine('postgresql://postgres:postgres@localhost/')
-some_engine = create_engine('postgresql+psycopg2://admin:admin@localhost/ecommerce')
+# some_engine = create_engine('postgresql+psycopg2://admin:admin@localhost/ecommerce')
+some_engine = create_engine('postgresql+psycopg2://admin:admin@localhost:5432/testShop')
 # db_session = scoped_session(sessionmaker(autocommit=False,
 #                                          autoflush=False,
 #                                          bind=some_engine))
@@ -26,6 +26,64 @@ Session = sessionmaker(bind=some_engine)
 db_session = Session()
 
 bp = Blueprint('auth', __name__, url_prefix='/auth')
+
+
+@bp.route("/user_list")
+def user_list():
+    r_user_id = session.get('r_user_id')
+    user = db_session.query(Userdata).get(r_user_id)
+    if user.is_admin:
+        users = db_session.query(Userdata).filter((Userdata.is_customer==True)|(Userdata.is_shopuser==True)).all()
+        return render_template("user/userlist.html", users=users)
+
+
+@bp.route("/add_user", methods=['GET', 'POST'])
+def add_user():
+    r_user_id = session.get('r_user_id')
+    user = db_session.query(Userdata).get(r_user_id)
+    if user.is_admin:
+        if request.method == 'POST':
+            full_name = request.form['full_name']
+            email = request.form['email']
+            username = request.form['username']
+            password = request.form['password']
+            address = request.form['address']
+            gender = request.form['gender']
+            dob = request.form['dob']
+            error = None
+
+            if not username:
+                error = 'Username is required.'
+            if not password:
+                error = 'password is required.'
+            if not full_name:
+                error = 'full name is required.'
+            if not email:
+                error = 'email is required.'
+            if not address:
+                error = 'address is required.'
+            if not gender:
+                error = 'gender is required.'
+            elif not dob:
+                error = 'dob is required.'
+            date = datetime.datetime.now()
+
+            if error is None:
+                try:
+                    user = Userdata(full_name=full_name, email=email, username=username,
+                                    password=generate_password_hash(password),
+                                    address=address, gender=gender, dob=dob, active=True, is_admin=False, is_customer=True,
+                                    is_shopuser=False, created_at=date,
+                                    updated_at=date)
+                    db_session.add(user)
+                    db_session.commit()
+
+                except:
+                    raise
+                    # error = f"User {username} is already registered."
+                else:
+                    return redirect(url_for("auth.user_list"))
+        return render_template('user/addUser.html')
 
 
 @bp.route("/shop_approval_list")
@@ -40,23 +98,12 @@ def shop_approval_list():
 
 @bp.route("/product_list")
 def product_list():
-    #page = request.args.get('page', 1, type=int)
-    # posts = Post.query.order_by(Post.date_posted.desc()).paginate(page=page, per_page=5)
-    #products = db_session.query(Product).paginate(page=page, per_page=5)
-    
-    
-    products = db_session.query(Product).all()
-
-    # results = [product.format() for product in products]
-    # print(results)
-    # print(len(results))
-    # return jsonify({
-    # 'success':True,
-    # 'results':results,
-    # 'count':len(results)
-    # })
-    print(products)
+    page = request.args.get('page', 1, type=int)
+    products = Product.query.paginate(page=page, per_page=3)
     return render_template("index.html", products=products)
+
+
+
 
 @bp.route("/wishlist", methods=['POST','GET'])
 def wishlist():
@@ -64,23 +111,21 @@ def wishlist():
     user = db_session.query(Userdata).get(r_user_id)
     if user.is_customer:
         wl = db_session.query(Wishlist).filter(Wishlist.user_id==r_user_id).first()
+        products = db_session.query(Product).filter(Product.id.in_(wl.product_id)).all()
         if wl:
-            return render_template("user/wishlish.html", wishlist=wl)
+            return render_template("user/wishlish.html", products=products)
         else:
             return redirect(url_for("auth.product_list"))
 
 
 @bp.route("/add_wishlist/<prod_id>", methods=['POST','GET'])
 def add_wishlist(prod_id):
-    
-    print("wishlist:",request.method)
     r_user_id = session.get('r_user_id')
     user = db_session.query(Userdata).get(r_user_id)
     date = datetime.datetime.now()
-    print("wishlist:",prod_id)
+
     if user.is_customer and prod_id:
         wl = db_session.query(Wishlist).filter(Wishlist.user_id==r_user_id).first()
-        print(wl)
         if not wl:
             wishlist = Wishlist(user_id=user.id, product_id=[prod_id],created_at=date,
                                    updated_at=date)
@@ -88,20 +133,105 @@ def add_wishlist(prod_id):
             db_session.commit()
         else:
             wl_id=wl.product_id
-            print(type(wl_id))
-            print(wl_id)
             wl_id.append(int(prod_id))
-            print(wl_id)
-            db_session.query(Wishlist).filter(Wishlist.id == wl.id).update({'product_id': wl_id })
+            db_session.query(Wishlist).filter(Wishlist.id == wl.id).update({'product_id': list(set(wl_id))})
             db_session.commit()
         wl = db_session.query(Wishlist).filter(Wishlist.user_id==r_user_id).first()
         return redirect(url_for("auth.product_list"))
     return redirect(url_for("auth.login"))
 
-@bp.route("/user_list")
-def user_list():
-    users = db_session.query(Userdata).filter(Userdata.is_customer==True)
-    return render_template("user/userlist.html", users=users)
+
+@bp.route("/delete_wishlist/<prod_id>", methods=['POST','GET'])
+def delete_wishlist(prod_id):
+    r_user_id = session.get('r_user_id')
+    user = db_session.query(Userdata).get(r_user_id)
+
+    if user.is_customer and prod_id:
+        wl = db_session.query(Wishlist).filter(Wishlist.user_id==r_user_id).first()
+        wl_id=wl.product_id
+        wl_id.remove(int(prod_id))
+        db_session.query(Wishlist).filter(Wishlist.id == wl.id).update({'product_id': list(set(wl_id))})
+        db_session.commit()
+        return redirect(url_for("auth.wishlist"))
+
+
+@bp.route("/cart", methods=['POST','GET'])
+def cart():
+    r_user_id = session.get('r_user_id')
+    user = db_session.query(Userdata).get(r_user_id)
+    
+    if user.is_customer:
+        cart = db_session.query(Cart).filter(Cart.user_id==r_user_id).first()
+        ids =[id for id in cart.items.keys()]
+        qty =[qt for qt in cart.items.values()]
+        products = db_session.query(Product).filter(Product.id.in_(ids)).all()
+        # products =[prod for prod in products]
+        # for item in cart.items:
+        print(products[0].product_name)
+        # print(jsonify({
+        # 'success':True,
+        # 'results':products,
+        # 'count':len(products)
+        # }))
+
+        # pieData = [{'color': '#400068', 'name': 'xyz', 'value': 10}, 
+        # {'color': '#4a8624', 'name': 'abc', 'value': 30}]
+        # print(type(products[0]))
+        # from markupsafe import Markup
+        # import json
+        # piedata=Markup(json.dumps(pieData))
+        if cart:
+            return render_template("user/cart.html", cart=cart)
+        else:
+            return render_template("user/cart.html")
+
+
+@bp.route("/add_cart/<prod_id>", methods=['POST','GET'])
+def add_cart(prod_id):
+    r_user_id = session.get('r_user_id')
+    user = db_session.query(Userdata).get(r_user_id)
+    date = datetime.datetime.now()
+
+    wl = db_session.query(Wishlist).filter(Wishlist.user_id==r_user_id).first()
+    if wl:
+        wl_id=wl.product_id
+        wl_id.remove(int(prod_id))
+        db_session.query(Wishlist).filter(Wishlist.id == wl.id).update({'product_id': list(set(wl_id))})
+        db_session.commit()
+
+    if user.is_customer and prod_id:
+        cart = db_session.query(Cart).filter(Cart.user_id==r_user_id).first()
+        if not cart:
+            items={}
+            items[prod_id]=1
+            add_cart = Cart(user_id=user.id, items=items,created_at=date,
+                                   updated_at=date)
+            db_session.add(add_cart)
+            db_session.commit()
+        else:
+            items=cart.items
+            if items.get(prod_id):
+                items[prod_id] =items[prod_id]+1
+            else:
+                items[prod_id]=1
+            db_session.query(Cart).filter(Cart.id == cart.id).update({'items': items})
+            db_session.commit()
+        return redirect(url_for("auth.product_list"))
+    return redirect(url_for("auth.login"))
+
+
+@bp.route("/delete_cart/<prod_id>", methods=['POST','GET'])
+def delete_cart(prod_id):
+    r_user_id = session.get('r_user_id')
+    user = db_session.query(Userdata).get(r_user_id)
+
+    if user.is_customer and prod_id:
+        cart = db_session.query(Cart).filter(Cart.user_id==r_user_id).first()
+        cart_items=cart.items
+        del cart_items[prod_id]
+        db_session.query(Cart).filter(Cart.id == cart.id).update({'items': cart_items})
+        db_session.commit()
+        return redirect(url_for("auth.cart"))
 
 
 @bp.route("/approval_shop/<id>")

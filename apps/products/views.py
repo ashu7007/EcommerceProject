@@ -16,7 +16,8 @@ from sqlalchemy.orm import sessionmaker, scoped_session
 from apps.products.models import Product
 from apps.users.models import Userdata
 
-some_engine = create_engine('postgresql+psycopg2://admin:admin@localhost/ecommerce')
+# some_engine = create_engine('postgresql+psycopg2://admin:admin@localhost/ecommerce')
+some_engine = create_engine('postgresql+psycopg2://admin:admin@localhost:5432/testShop')
 Session = sessionmaker(bind=some_engine)
 db_session = Session()
 
@@ -45,7 +46,10 @@ def shop_dashboard():
 @prod_bp.route("/create_product", methods=['POST','GET'])
 def create_product():
     r_user_id = session.get('r_user_id')
-    user = db_session.query(Userdata).get(r_user_id)
+    print('r_user_id',r_user_id)
+    user = Userdata.query.get(r_user_id)
+    print(user)
+    # user = db_session.query(Userdata).get(r_user_id)
 
     if request.method == 'POST' and user.is_shopuser:
 
