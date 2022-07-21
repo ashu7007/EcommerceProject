@@ -193,7 +193,7 @@ def add_cart(prod_id):
     date = datetime.datetime.now()
 
     wl = db_session.query(Wishlist).filter(Wishlist.user_id==r_user_id).first()
-    if wl:
+    if wl and prod_id in wl.product_id:
         wl_id=wl.product_id
         wl_id.remove(int(prod_id))
         db_session.query(Wishlist).filter(Wishlist.id == wl.id).update({'product_id': list(set(wl_id))})
