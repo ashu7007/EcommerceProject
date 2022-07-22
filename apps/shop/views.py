@@ -118,9 +118,28 @@ def delete_shop(id):
 def update_shop(id):
     r_user_id = session.get('r_user_id')
     user = db_session.query(Userdata).get(r_user_id)
-    if user.is_admin:
-        shops = db_session.query(Shop).all()
-        db_session.query(Shop).filter(Shop.id == id).update({'active': True, 'status': 'Approved'})
+
+    if request.method == 'POST'and user.is_admin:
+
+        store_name = request.form['store_name']
+        description = request.form['description']
+        
+        error = None
+
+        if not store_name:
+            error = 'store name is required.'
+        if not description:
+            error = 'description is required.'
+
+        date = datetime.datetime.now()
+
+        
+        db_session.query(Shop).filter(Shop.id == id).update({
+            'store_name':store_name,
+            'description':description,
+            'active': True,
+         'status': 'Approved'
+         })
         db_session.commit()
         return redirect(url_for("shop.list_shop"))
         # return render_template("shop/shoplist.html", shops=shops)

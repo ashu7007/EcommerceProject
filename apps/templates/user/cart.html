@@ -2,9 +2,19 @@
 
 
 {% block content %}
-  
+<div class="row">
+    <h2 class="col-5">Cart</h2>
+    <h2 class="col-2 ">Total</h2>
+    <h2 class="col-3 " id="total"></h2>
+    <div class="col d-flex justify-content-end">
+        <a href="{{ url_for('auth.place_order') }}" class= "btn btn-danger btn-sm my-2"><span>Order Now</span></a>
+          
+          </div>
 
-<table id="table_id" class=" display table container">
+</div>
+
+
+<table id="table_id" class=" display table ">
         <thead>
             <tr>
                 <!-- <th scope="col">#</th> -->
@@ -22,6 +32,7 @@
             
             <!-- %for  sh in cart% -->
             {% for i,j in cart.items.items() %}
+            
             <tr >
               <th scope="row">{{i|product_name}}</th>
               <th >{{i|product_price}}</th>
@@ -31,11 +42,13 @@
               
               <td>
                   <div class="row">
-                    
+                    <div class="col">
+                        <a href="{{ url_for('auth.add_cart', prod_id=i,page='cart') }}" class="col btn btn-info btn-sm mb-2" style="width:100%;"><span>+</span></a>
+                        </div>
                       
                       <div class="col">
-                          <button type="button" class="btn btn-danger btn-sm" style="width:100%", data-toggle="modal" data-target="#{{i}}delete" data-whatever="@mdo">Remove</button>
-                          <!-- <input class="btn btn-danger btn-sm mx-1" type=submit value="Reject" style="width:100%"> -->
+                        <a href="{{ url_for('auth.delete_cart',prod_id =i) }}" class="col btn btn-danger btn-sm mb-2" style="width:100%;"><span>--</span></a>
+                          
                           </div>
                   </div>
                  
@@ -61,7 +74,7 @@
                                       <div class="my-3" id = "{{cart.id}}">
                                       <button type="button " class="btn btn-secondary btn-sm" data-dismiss="modal">Close</button>
                                       <a href="{{ url_for('auth.delete_cart',prod_id =i) }}">
-                                          <button type="button " class="btn btn-danger btn-sm" id="del">Remove</button>
+                                          <button type="button " class="btn btn-danger btn-sm" id="del">-</button>
                                       </a>
                                       </div>
                               </div>
@@ -86,6 +99,15 @@
     $('#myModal').on('shown.bs.modal', function () {
   $('#myInput').trigger('focus')
 })
+
+
+$(document).ready( function updateSubTotal() {
+  var table = document.getElementById("table_id");
+  let subTotal = Array.from(table.rows).slice(1).reduce((total, row) => {
+    return total + parseFloat(row.cells[1].innerHTML * row.cells[3].innerHTML);
+  }, 0);
+  document.getElementById("total").innerHTML = "$ " + subTotal.toFixed(2);
+} );
 
 </script>
 {% endblock %}

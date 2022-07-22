@@ -72,18 +72,24 @@
                                   <div class="row">
                                     <div class="col mb-3">
                                       <label class="form-label" for="category_id">category</label>
-                                      <input class="form-control" name="category_id" id="category_id" required>
+                                      <!-- <input class="form-control" name="category_id" id="category_id" required> -->
+                                      <label class="form-label" for="category_id">category</label>
+                                        <select class="form-select"  name="category_id" aria-label="Default select example" required>
+                                          {% for cat in category %}
+                                          <option value="{{cat.id}}">{{cat.category_name}}</option>
+                                          {% endfor %}
+                                        </select>
                                     </div>
                                     <div class="col mb-3">
                                       <label class="form-label" for="email">product name</label>
-                                      <input class="form-control" name="product_name" id="product_name" required>
+                                      <input class="form-control" name="product_name" id="product_name" value="{{prod.product_name}}" required>
                                     </div>
                                    </div>
                             
                                    <div class="row">
                                   <div class="col mb-3">
                                   <label class="form-label" for="stock_quantity">stock quantity</label>
-                                  <input class="form-control" name="stock_quantity" id="stock_quantity" required>
+                                  <input class="form-control" name="stock_quantity" id="stock_quantity" value="{{prod.stock_quantity}}" required>
                                   </div>
                                   <!-- <div class="col mb-3">
                                   <label class="form-label" for="sold_quantity">sold quantity</label>
@@ -92,7 +98,7 @@
                             
                                   <div class="col mb-3">
                                     <label class="form-label" for="price">price</label>
-                                    <input class="form-control" name="price" id="price" required>
+                                    <input class="form-control" name="price" id="price" value="{{prod.price}}" required>
                                     </div>
                                 </div>
                             
@@ -100,7 +106,7 @@
                                   
                                   <div class="col mb-3">
                                   <label class="form-label" for="brand">brand</label>
-                                  <input class="form-control" name="brand" id="brand" required>
+                                  <input class="form-control" name="brand" id="brand" value="{{prod.brand}}" required>
                                   </div>
                                 </div>
                                 

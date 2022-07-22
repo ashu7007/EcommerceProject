@@ -1,3 +1,4 @@
+import enum
 import datetime
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 from flask import current_app
@@ -24,6 +25,7 @@ class Userdata(db.Model):
     created_at = db.Column(db.DateTime)
     updated_at = db.Column(db.DateTime)
     shop = db.relationship('Shop', backref='shops',lazy=True)
+    order = db.relationship('Orders', backref='user',lazy=True)
     # wishlist = db.relationship("Wishlist", back_populates="user")
 
 
@@ -66,6 +68,47 @@ class Cart(db.Model):
 
     def __repr__(self):
         return f"Cart'{self.id}')"
+
+class Status(enum.Enum):
+    StatusInit = 0
+    StatusProcessed = 1
+    StatusCancelled = 2
+    StatusDelivered = 3
+
+
+class Payment(enum.Enum):
+    pending = 1
+    paid = 2
+
+
+class Orders(db.Model):
+    __tablename__ = 'orders'
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('userdata.id'))
+    status = db.Column(db.Enum(Status))
+    payment = db.Column(db.Enum(Payment))
+    created_at = db.Column(db.DateTime)
+    updated_at = db.Column(db.DateTime)
+    orderdetail = db.relationship('OrderDetail', backref='order',lazy=True)
+
+
+    def __repr__(self):
+        return f"Order'{self.id} status{self.status}')"
+
+
+class OrderDetail(db.Model):
+    __tablename__ = 'orderdetail'
+
+    id = db.Column(db.Integer, primary_key=True)
+    order_id = db.Column(db.Integer, db.ForeignKey('orders.id'))
+    product_id = db.Column(db.Integer, db.ForeignKey('product.id'))
+    quantity = db.Column(db.Integer, nullable=False)
+    price = db.Column(db.Integer, nullable=False)
+    created_at = db.Column(db.DateTime)
+    updated_at = db.Column(db.DateTime)
+
+    def __repr__(self):
+        return f"OrderDetail'{self.id}')"
 
 
 class OTP(db.Model):

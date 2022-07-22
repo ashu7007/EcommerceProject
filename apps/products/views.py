@@ -13,7 +13,7 @@ from dbConfig import db
 from sqlalchemy import create_engine, desc
 from sqlalchemy.orm import sessionmaker, scoped_session
 
-from apps.products.models import Product
+from apps.products.models import Product,Category
 from apps.users.models import Userdata
 
 # some_engine = create_engine('postgresql+psycopg2://admin:admin@localhost/ecommerce')
@@ -31,7 +31,8 @@ def shop_dashboard():
     user = db_session.query(Userdata).get(r_user_id)
     if user.is_shopuser or user.is_admin:
         products = db_session.query(Product).filter(Product.user_id==user.id).all()
-        return render_template('shop/shopDashboard.html',product=products)
+        category = Category.query.all()
+        return render_template('shop/shopDashboard.html',product=products,category=category)
 
 
 # @bp.route("/list_shop", methods=['POST','GET'])
@@ -100,7 +101,8 @@ def create_product():
 
         flash(error)
     #return redirect(url_for("product.shop_dashboard"))
-    return render_template('product/createproduct.html')
+    category = Category.query.all()
+    return render_template('product/createproduct.html',category=category)
 
 
 @prod_bp.route('/delete/<id>', methods=('GET','POST'))

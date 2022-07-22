@@ -68,32 +68,32 @@
                                 </button>
                             </div>
                             <div class="modal-body ">
-                                <form action="{{ url_for('auth.reject_shop',id =sh.id) }}" method="post">
+                                <form action="{{ url_for('shop.update_shop',id =sh.id) }}" method="post">
                                     <div class="mb-3">
                                         <label class="form-label" for="store_name">Store Name</label>
-                                        <input class="form-control" name="store_name" id="store_name" required>
+                                        <input class="form-control" name="store_name" id="store_name" value="{{sh.store_name}}" required>
                                     </div>
                                     <div class=" mb-3">
                                         <label class="form-label" for="description">Description</label>
-                                        <input class="form-control" name="description" id="description" required>
+                                        <input class="form-control" name="description" id="description" value="{{sh.description}}" required>
                                     </div>
                                     
-                                        <div class="row">
-                                            delete_wishlist                                      <label class="form-label" >
+                                        <!-- <div class="row">
+                                                                                <label class="form-label" >
                                                 Shop active
                                                 </label>
                                             <div class="col">
                                                 <div class="form-check">
-                                                    <input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault1" checked>
-                                                    <label class="form-check-label" for="flexRadioDefault1">
+                                                    <input class="form-check-input" type="radio" name="shop_active" id="shop_active" checked>
+                                                    <label class="form-check-label" for="shop_active" value="1">
                                                     Active
                                                     </label>
                                                 </div>
                                             </div>
                                             <div class="col">
                                               <div class="form-check">
-                                                <input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault2" >
-                                                <label class="form-check-label" for="flexRadioDefault2">
+                                                <input class="form-check-input" type="radio" name="shop_active" id="shop_active" >
+                                                <label class="form-check-label" for="shop_active" value="0">
                                                     InActive
                                                 </label>
                                               </div>
@@ -120,12 +120,11 @@
                                               </div>
                                             </div>
                                         </div>
-            
+             -->
                                     
 
 
-                                      
-                                        delete_wishlist                              <div class="my-3">
+                                    <div class="my-3">
                                     <button type="button " class="btn btn-secondary btn-sm" data-dismiss="modal">Close</button>
                                     <input class="btn btn-warning btn-sm" type=submit value="Update" >
                                     </div>

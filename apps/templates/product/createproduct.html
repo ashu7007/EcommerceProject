@@ -10,7 +10,11 @@
       <div class="row">
         <div class="col mb-3">
           <label class="form-label" for="category_id">category</label>
-          <input class="form-control" name="category_id" id="category_id" required>
+          <select class="form-select"  name="category_id" aria-label="Default select example" required>
+            {% for cat in category %}
+            <option value="{{cat.id}}">{{cat.category_name}}</option>
+            {% endfor %}
+          </select>
         </div>
         <div class="col mb-3">
           <label class="form-label" for="email">product name</label>

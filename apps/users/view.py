@@ -8,7 +8,7 @@ from flask import jsonify
 from flask import (Blueprint, flash, g, redirect, render_template, request, session, url_for)
 from werkzeug.security import check_password_hash, generate_password_hash
 
-from .models import Userdata, OTP, Shop, ShopRejection, Wishlist, Cart
+from apps.users.models import Userdata, OTP, Shop, ShopRejection, Wishlist, Cart,Orders,OrderDetail,Status,Payment
 from apps.products.models import Product
 
 from dbConfig import db
@@ -118,6 +118,61 @@ def wishlist():
             return redirect(url_for("auth.product_list"))
 
 
+
+@bp.route("/place_order")
+def place_order():
+    r_user_id = session.get('r_user_id')
+    user = db_session.query(Userdata).get(r_user_id)
+    date = datetime.datetime.now()
+    if user.is_customer:
+        cart = db_session.query(Cart).filter(Cart.user_id==r_user_id).first();
+        order = Orders(user_id=r_user_id, status=Status.StatusInit, payment=Payment.paid,
+                        created_at=date,updated_at=date)
+        db_session.add(order)
+        db_session.commit()
+        for item,qnt in cart.items.items():
+            product = db_session.query(Product).filter(Product.id==item).first()
+            orderdetail = OrderDetail(order_id=order.id, product_id=item, 
+                        quantity=qnt,price=product.price,
+                        created_at=date,updated_at=date)
+            db_session.add(orderdetail)
+            db_session.commit()
+
+        db_session.query(Cart).filter(Cart.id == cart.id).update({'items': {}})
+        db_session.commit()
+        print("mmmmmmmmmmmm",order.id)
+        return redirect(url_for("auth.product_list"))
+    return redirect(url_for("auth.login"))
+
+@bp.route("/order_detail/<order_id>")
+def order_detail(order_id):
+    r_user_id = session.get('r_user_id')
+    user = db_session.query(Userdata).get(r_user_id)
+    if user.is_customer:
+        order_detail = db_session.query(OrderDetail).filter(OrderDetail.order_id==order_id).all()
+        return render_template("user/orderDetail.html", order_detail=order_detail,order_id=order_id)
+
+
+@bp.route("/cancel_order/<order_id>")
+def cancel_order(order_id):
+    r_user_id = session.get('r_user_id')
+    user = db_session.query(Userdata).get(r_user_id)
+    if user.is_customer:        
+        db_session.query(Orders).filter(Orders.id==order_id).update({'status':Status.StatusCancelled})
+        db_session.commit()
+        return redirect(url_for("auth.orders"))
+
+
+@bp.route("/orders")
+def orders():
+    r_user_id = session.get('r_user_id')
+    user = db_session.query(Userdata).get(r_user_id)
+    if user.is_customer:
+        orders = Orders.query.all()
+        return render_template('user/orderlist.html',orders=orders)
+    return redirect(url_for("auth.login"))
+
+
 @bp.route("/add_wishlist/<prod_id>", methods=['POST','GET'])
 def add_wishlist(prod_id):
     r_user_id = session.get('r_user_id')
@@ -165,35 +220,21 @@ def cart():
         ids =[id for id in cart.items.keys()]
         qty =[qt for qt in cart.items.values()]
         products = db_session.query(Product).filter(Product.id.in_(ids)).all()
-        # products =[prod for prod in products]
-        # for item in cart.items:
-        print(products[0].product_name)
-        # print(jsonify({
-        # 'success':True,
-        # 'results':products,
-        # 'count':len(products)
-        # }))
-
-        # pieData = [{'color': '#400068', 'name': 'xyz', 'value': 10}, 
-        # {'color': '#4a8624', 'name': 'abc', 'value': 30}]
-        # print(type(products[0]))
-        # from markupsafe import Markup
-        # import json
-        # piedata=Markup(json.dumps(pieData))
         if cart:
             return render_template("user/cart.html", cart=cart)
         else:
             return render_template("user/cart.html")
 
 
-@bp.route("/add_cart/<prod_id>", methods=['POST','GET'])
-def add_cart(prod_id):
+@bp.route("/add_cart/<prod_id>/<page>", methods=['POST','GET'])
+def add_cart(prod_id,page):
     r_user_id = session.get('r_user_id')
     user = db_session.query(Userdata).get(r_user_id)
     date = datetime.datetime.now()
 
     wl = db_session.query(Wishlist).filter(Wishlist.user_id==r_user_id).first()
-    if wl and prod_id in wl.product_id:
+
+    if wl and int(prod_id) in wl.product_id:
         wl_id=wl.product_id
         wl_id.remove(int(prod_id))
         db_session.query(Wishlist).filter(Wishlist.id == wl.id).update({'product_id': list(set(wl_id))})
@@ -216,7 +257,12 @@ def add_cart(prod_id):
                 items[prod_id]=1
             db_session.query(Cart).filter(Cart.id == cart.id).update({'items': items})
             db_session.commit()
-        return redirect(url_for("auth.product_list"))
+        if page=="wish":
+            return redirect(url_for("auth.wishlist"))
+        if page=="cart":
+            return redirect(url_for("auth.cart"))
+        if page=="index":
+            return redirect(url_for("auth.product_list"))
     return redirect(url_for("auth.login"))
 
 
@@ -225,13 +271,26 @@ def delete_cart(prod_id):
     r_user_id = session.get('r_user_id')
     user = db_session.query(Userdata).get(r_user_id)
 
+    # if user.is_customer and prod_id:
+    #     cart = db_session.query(Cart).filter(Cart.user_id==r_user_id).first()
+    #     cart_items=cart.items
+    #     del cart_items[prod_id]
+    #     db_session.query(Cart).filter(Cart.id == cart.id).update({'items': cart_items})
+    #     db_session.commit()
+    #     return redirect(url_for("auth.cart"))
     if user.is_customer and prod_id:
         cart = db_session.query(Cart).filter(Cart.user_id==r_user_id).first()
-        cart_items=cart.items
-        del cart_items[prod_id]
-        db_session.query(Cart).filter(Cart.id == cart.id).update({'items': cart_items})
+        items=cart.items
+        if items.get(prod_id)>0:
+            items[prod_id] =items[prod_id]-1
+            if items.get(prod_id)<=0:
+                del items[prod_id]
+        else:
+            del items[prod_id]
+        db_session.query(Cart).filter(Cart.id == cart.id).update({'items': items})
         db_session.commit()
         return redirect(url_for("auth.cart"))
+    return redirect(url_for("auth.login"))
 
 
 @bp.route("/approval_shop/<id>")
@@ -438,6 +497,7 @@ def login():
 
         if user is None:
             error = 'Incorrect username.'
+
         elif not check_password_hash(user.password, password):
             error = 'Incorrect password.'
 
@@ -449,9 +509,7 @@ def login():
         elif error is None and user.active and user.is_admin:
             session.clear()
             session['r_user_id'] = user.id
-            # shops = db_session.query(Shop).all()
             return redirect(url_for("shop.list_shop"))
-            # return render_template("user/shoplist.html", shops=shops)
 
         elif error is None and user.active and user.is_shopuser:
             shop = db_session.query(Shop).filter(Shop.user_id == user.id).first()
