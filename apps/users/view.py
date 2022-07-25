@@ -62,9 +62,9 @@ def shop_sale():
         data = request.form.get('data')
 
         if data.isdigit():
-            product= Product.query.filter(Product.category_id==int(data)).all()
+            product= Product.query.filter(Product.category_id==int(data),Product.user_id==user.id).all()
         else:
-            product= Product.query.filter(Product.brand==data).all()
+            product= Product.query.filter(Product.brand==data,Product.user_id==user.id).all()
         for prod in product:
             total_qnt = total_qnt + prod.stock_quantity
             total_sold = total_sold + prod.sold_quantity
