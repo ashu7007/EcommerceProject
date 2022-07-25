@@ -51,7 +51,7 @@ app.register_blueprint(views.prod_bp)
 
 #custom filter
 from apps.products.models import Product
-from apps.users.models import OrderDetail
+from apps.users.models import OrderDetail, Orders
 
 @app.template_filter('product_name')
 def product_name(id):
@@ -76,6 +76,20 @@ def total_price(id):
         total = total+(data.price*data.quantity)
     return total
 
+@app.template_filter('customer_username')
+def customer_username(order_id):
+    order = Orders.query.filter(Orders.id==order_id).first()
+    return order.user.username
+
+@app.template_filter('customer_email')
+def customer_email(order_id):
+    order = Orders.query.filter(Orders.id==order_id).first()
+    return order.user.email
+
+@app.template_filter('customer_address')
+def customer_address(order_id):
+    order = Orders.query.filter(Orders.id==order_id).first()
+    return order.user.address
 
 
 

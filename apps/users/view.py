@@ -9,12 +9,13 @@ from flask import (Blueprint, flash, g, redirect, render_template, request, sess
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from apps.users.models import Userdata, OTP, Shop, ShopRejection, Wishlist, Cart,Orders,OrderDetail,Status,Payment
-from apps.products.models import Product
+from apps.products.models import Product,Category
 
 from dbConfig import db
 
 from sqlalchemy import create_engine, desc
 from sqlalchemy.orm import sessionmaker, scoped_session
+from sqlalchemy.sql import func
 
 # some_engine = create_engine('postgresql+psycopg2://admin:admin@localhost/ecommerce')
 some_engine = create_engine('postgresql+psycopg2://admin:admin@localhost:5432/testShop')
@@ -26,6 +27,50 @@ Session = sessionmaker(bind=some_engine)
 db_session = Session()
 
 bp = Blueprint('auth', __name__, url_prefix='/auth')
+
+
+@bp.route("/shop_orders")
+def order_for_shopuser():
+    r_user_id = session.get('r_user_id')
+    user = db_session.query(Userdata).get(r_user_id)
+    if user.is_shopuser:
+        shop_user = Userdata.query.filter(Userdata.id==user.id).first();
+        ids = [product.id for product in shop_user.product]
+        orders= OrderDetail.query.filter(OrderDetail.product_id.in_(ids)).all()
+        return render_template("user/shopOrders.html", orders=orders)
+
+
+# @bp.route("/shop_sale/")
+# def shop_sale():
+#     r_user_id = session.get('r_user_id')
+#     user = db_session.query(Userdata).get(r_user_id)
+#     if user.is_shopuser:
+#         category = Category.query.all()
+#         brand = Product.query.distinct(Product.brand)
+#         return render_template("shopdashboard.html",category=category,brand=brand)
+
+@bp.route("/shop_sale/", methods=['POST','GET'])
+def shop_sale():
+    r_user_id = session.get('r_user_id')
+    user = db_session.query(Userdata).get(r_user_id)
+    total_qnt=0
+    total_sold=0
+    category = Category.query.all()
+    brand = Product.query.distinct(Product.brand)
+    
+    if user.is_shopuser and request.method=='POST':
+        data = request.form.get('data')
+
+        if data.isdigit():
+            product= Product.query.filter(Product.category_id==int(data)).all()
+        else:
+            product= Product.query.filter(Product.brand==data).all()
+        for prod in product:
+            total_qnt = total_qnt + prod.stock_quantity
+            total_sold = total_sold + prod.sold_quantity
+        return render_template("shopdashboard.html",category=category,
+            brand=brand,total_qnt=total_qnt,total_sold= total_sold)
+    return render_template("shopdashboard.html",category=category,brand=brand)
 
 
 @bp.route("/user_list")

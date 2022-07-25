@@ -26,6 +26,7 @@ class Userdata(db.Model):
     updated_at = db.Column(db.DateTime)
     shop = db.relationship('Shop', backref='shops',lazy=True)
     order = db.relationship('Orders', backref='user',lazy=True)
+    product = db.relationship('Product', backref='shopuser',lazy=True)
     # wishlist = db.relationship("Wishlist", back_populates="user")
 
 
