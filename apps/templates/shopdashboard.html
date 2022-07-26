@@ -5,7 +5,7 @@
 
 {% block content %}
 <div class="container-fluid">
-<div class="row mx-auto">
+
 
     <div class="row">
         <div class="col mb-3">
@@ -46,22 +46,15 @@
             <label class="form-label">In Stock :<span id="stock">{{total_qnt}}</span></label>
             
             </div>
-            <div>
-                <canvas id="myChart"></canvas>
-              </div>
+            <div class="chart-container" style="position: relative; height:40vh; width:80vw">
+              <canvas id="myChart"></canvas>
+          </div>
     </div>
-
-
-  
-
-
-
-
-
-  <!-- % endfor % -->
- 
 </div>
-</div>
+
+
+
+
 
 <script>
     const stock = document.getElementById('stock').innerHTML;
@@ -82,21 +75,23 @@
       'rgb(255, 99, 132)',
       'rgb(255, 205, 86)'
     ],
-    hoverOffset: 1,
+    hoverOffset: 0,
     radius:'50%',
-    clientHeight: 6,
+    clientHeight: 36,
     height: 103,
-    offsetHeight: 6,
-    borderRadius:0
+    offsetHeight: 36,
+    borderRadius:0,
+    spacing:1
   }]
 };
   
     const config = {
   type: 'doughnut',
   data: data,
-  options: {
-        maintainAspectRatio: false,
-    }
+  options: {  
+    responsive: true,
+    maintainAspectRatio: false
+}
 };
   </script>
 

@@ -4,7 +4,7 @@ import functools
 from random import randint
 from flask import current_app
 from flask_mail import Mail, Message
-from flask import jsonify
+from flask import jsonify, abort
 from flask import (Blueprint, flash, g, redirect, render_template, request, session, url_for)
 from werkzeug.security import check_password_hash, generate_password_hash
 
@@ -40,14 +40,82 @@ def order_for_shopuser():
         return render_template("user/shopOrders.html", orders=orders)
 
 
-# @bp.route("/shop_sale/")
-# def shop_sale():
-#     r_user_id = session.get('r_user_id')
-#     user = db_session.query(Userdata).get(r_user_id)
-#     if user.is_shopuser:
-#         category = Category.query.all()
-#         brand = Product.query.distinct(Product.brand)
-#         return render_template("shopdashboard.html",category=category,brand=brand)
+@bp.route("/admin_dashboard/",methods=['POST','GET'])
+def admin_dashboard():
+    r_user_id = session.get('r_user_id')
+    user = db_session.query(Userdata).get(r_user_id)
+    shops = Shop.query.filter(Shop.active==True).all()
+    brand = Product.query.distinct(Product.brand)
+    customer = Userdata.query.filter(Userdata.is_customer==True).all()
+    
+    if user.is_admin and request.method=='POST':
+        if request.form.get('shop_products'):
+            products= Product.query.filter(Product.shop_id==request.form.get('shop_products')).all()
+            return render_template("admindashboard.html",shops=shops,brand=brand
+            ,customer=customer,products=products)
+        
+        if request.form.get('shop_orders'):
+            shop= Shop.query.filter(Shop.id== request.form.get('shop_orders')).first()
+            shop_user = Userdata.query.filter(Userdata.id==shop.user_id).first();
+            ids = [product.id for product in shop_user.product]
+            shop_orders= OrderDetail.query.filter(OrderDetail.product_id.in_(ids)).all()
+            return render_template("admindashboard.html",shops=shops,brand=brand
+            ,customer=customer,shop_orders=shop_orders)
+
+        if request.form.get('customer_orders'):
+            customer_order= Orders.query.filter(Orders.user_id==request.form.get('customer_orders')).all()
+            return render_template("admindashboard.html",shops=shops,brand=brand,
+            customer=customer,customer_order=customer_order,)
+
+    return render_template("admindashboard.html",shops=shops,brand=brand,customer=customer)
+
+
+@bp.route("/all_product/",methods=['POST','GET'])
+def all_product():
+    # r_user_id = session.get('r_user_id')
+    # user = db_session.query(Userdata).get(r_user_id)
+    products= Product.query.all()
+    return render_template("product/allProduct.html",products=products)
+
+@bp.route("/all_orders/",methods=['POST','GET'])
+def all_orders():
+    # r_user_id = session.get('r_user_id')
+    # user = db_session.query(Userdata).get(r_user_id)
+    orders= Orders.query.all()
+    return render_template("product/allorders.html",orders=orders)
+
+@bp.route("/admin_sale/", methods=['POST','GET'])
+def admin_sale():
+    r_user_id = session.get('r_user_id')
+    user = db_session.query(Userdata).get(r_user_id)
+    shops = Shop.query.filter(Shop.active==True).all()
+    category = Category.query.all()
+    brand = Product.query.distinct(Product.brand)
+    if user.is_admin and request.method=='POST':
+
+        if request.form.get('shop'):
+            wise = "shop"
+            data = Shop.query.get(request.form.get('shop'))
+            product = db_session.query(Product).filter(Product.shop_id==request.form.get('shop'))
+            
+        if request.form.get('category'):
+            wise = "category"
+            data = Category.query.get(request.form.get('category'))
+            product = db_session.query(Product).filter(Product.category_id==request.form.get('category'))
+
+        if request.form.get('brand'):
+            wise = "brand"
+            data = request.form.get('brand')
+            product = db_session.query(Product).filter(Product.brand==request.form.get('brand'))
+        
+        sold = product.with_entities(func.sum(Product.sold_quantity)).scalar()
+        total = product.with_entities(func.sum(Product.stock_quantity)).scalar()
+        return render_template("adminSaleDashboard.html",shops=shops,category=category,
+        brand=brand,total_qnt=total,total_sold= sold,wise=wise,data=data)
+
+    return render_template("adminSaleDashboard.html",shops=shops,category=category,brand=brand,
+    total_qnt=None,total_sold= None,wise=None,data=None)
+
 
 @bp.route("/shop_sale/", methods=['POST','GET'])
 def shop_sale():
@@ -57,8 +125,9 @@ def shop_sale():
     total_sold=0
     category = Category.query.all()
     brand = Product.query.distinct(Product.brand)
-    
-    if user.is_shopuser and request.method=='POST':
+    shops = Shop.query.filter(Shop.active==True).all()
+
+    if user.is_admin and request.method=='POST':
         data = request.form.get('data')
 
         if data.isdigit():
@@ -185,7 +254,6 @@ def place_order():
 
         db_session.query(Cart).filter(Cart.id == cart.id).update({'items': {}})
         db_session.commit()
-        print("mmmmmmmmmmmm",order.id)
         return redirect(url_for("auth.product_list"))
     return redirect(url_for("auth.login"))
 
@@ -193,10 +261,10 @@ def place_order():
 def order_detail(order_id):
     r_user_id = session.get('r_user_id')
     user = db_session.query(Userdata).get(r_user_id)
-    if user.is_customer:
+    if user:
         order_detail = db_session.query(OrderDetail).filter(OrderDetail.order_id==order_id).all()
         return render_template("user/orderDetail.html", order_detail=order_detail,order_id=order_id)
-
+    return abort(401, "You have to provide either 'url' or 'text', too")
 
 @bp.route("/cancel_order/<order_id>")
 def cancel_order(order_id):
@@ -389,6 +457,7 @@ def register():
         email = request.form['email']
         username = request.form['username']
         password = request.form['password']
+        conpassword = request.form['conPassword']
         address = request.form['address']
         gender = request.form['gender']
         dob = request.form['dob']
@@ -399,6 +468,8 @@ def register():
             error = 'Username is required.'
         if not password:
             error = 'password is required.'
+        if conpassword != password:
+            error = 'password not match.'
         if not full_name:
             error = 'full name is required.'
         if not email:

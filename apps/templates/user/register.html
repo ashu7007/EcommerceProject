@@ -6,7 +6,7 @@
 <div class="card mx-auto" style="width: 35rem;">
   <h1 class=" d-flex justify-content-center mx-4">User Registration</h1>
   <div class="card-body">
-    <form  method="post">
+    <form  method="post" oninput='conPassword.setCustomValidity(conPassword.value != Password.value ? "Passwords do not match." : "")'>
       <div class="row">
         <div class="col mb-3">
           <label class="form-label" for="full_name">Full Name</label>
@@ -24,32 +24,38 @@
       <input class="form-control" name="username" id="username" required>
       </div>
       <div class="col mb-3">
-      <label class="form-label" for="password">Password</label>
-      <input class="form-control" type="password" name="password" id="password" required>
+        <label class="form-label" for="gender">Gender</label>
+        <select class="form-select"  name="gender" id="gender" required aria-label="Default select example">
+        
+          <option value="male">Male</option>
+          <option value="female">Female</option>
+          
+        </select>
+        </div>
+    </div>
+
+    <div class="row">
+      <div class="col mb-3">
+        <label class="form-label" for="password">Password</label>
+        <input class="form-control" type="password" name="password" id="password" required>
+        </div>
+      <div class="col mb-3">
+      <label class="form-label" for="conpassword">Password</label>
+      <input class="form-control" type="password" name="conPassword" id="conPassword" required>
       </div>
     </div>
 
-      <div class="row">
-        <div class="col mb-3">
-          <label class="form-label" for="gender">Gender</label>
-          <select class="form-select"  name="gender" id="gender" required aria-label="Default select example">
-          
-            <option value="male">Male</option>
-            <option value="female">Female</option>
-            
-          </select>
-          </div>
-          <div class="col mb-3">
-          <label class="form-label" for="dob">Date of birth</label>
-          <input class="form-control" type="date" name="dob" id="dob" required>
-          </div>
-    </div>
+      
 
       <div class="row">
       <div class="col mb-3">
       <label class="form-label" for="address">Address</label>
       <input class="form-control" name="address" id="address" required>
       </div>
+      <div class="col mb-3">
+        <label class="form-label" for="dob">Date of birth</label>
+        <input class="form-control" type="date" name="dob" id="dob" required>
+        </div>
     </div>
       
     <div class="row">

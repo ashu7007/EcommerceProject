@@ -3,7 +3,7 @@
 
 
 {% block content %}
-<div class="card mx-auto" style="width: 25rem;">
+<div class="card mx-auto">
   <h1 class=" mx-4">User Profile</h1>
   <div class="card-body">
     <form  method="post">
@@ -28,12 +28,18 @@
         <input class="form-control" type="password" name="password" id="password" required>
         </div> -->
       <div class="mb-3">
-      <label class="form-label" for="gender">Gender</label>
-      <input class="form-control" name="gender" id="gender" value="{{user.gender}}" required>
+        <label class="form-label" for="gender">Gender</label>
+        <select class="form-select"  name="gender" id="gender" required aria-label="Default select example">
+        
+          <option value="male">Male</option>
+          <option value="female">Female</option>
+          
+        </select>
       </div>
       <div class="mb-3">
       <label class="form-label" for="dob">Date of birth</label>
-      <input class="form-control"  name="dob" id="dob"  value="{{user.dob}}" placeholder="{{user.dob}}"  required>
+      <input class="form-control" type="date" name="dob" id="dob"  placeholder="{{user.dob}}" required>
+      <!-- <input class="form-control"  name="dob" id="dob"   required> -->
       </div>
       <div class="mb-3">
       <label class="form-label" for="address">Address</label>

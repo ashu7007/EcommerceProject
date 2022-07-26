@@ -89,15 +89,9 @@
             <span class="logo_name">Shop Online</span>
           </div>
           <ul class="nav-links">
-            <li>
-              <a href="#">
-                <i class='bx bx-grid-alt'></i>
-                <span class="link_name">Dashboard</span>
-              </a>
-              <ul class="sub-menu blank">
-                <li><a class="link_name" href="#">Dashboard</a></li>
-              </ul>
-            </li>
+           
+            {% if g.user.is_customer %}
+            
             <li>
               <div class="icon-link">
                 <a href="#">
@@ -113,9 +107,6 @@
                 <li><a href="#">PHP & MySQL</a></li>
               </ul>
             </li>
-            
-           
-            {% if g.user.is_customer %}
             
             <li>
               <div class="icon-link">
@@ -181,6 +172,30 @@
 
             {% if g.user.is_shopuser %}
             <li>
+              <a href="#">
+                <i class='bx bx-grid-alt'></i>
+                <span class="link_name">Dashboard</span>
+              </a>
+              <ul class="sub-menu blank">
+                <li><a class="link_name" href="#">Dashboard</a></li>
+              </ul>
+            </li>
+            <li>
+              <div class="icon-link">
+                <a href="#">
+                  <i class='bx bx-collection'></i>
+                  <span class="link_name">Category</span>
+                </a>
+                <i class='bx bxs-chevron-down arrow'></i>
+              </div>
+              <ul class="sub-menu">
+                <li><a class="link_name" href="#">Category</a></li>
+                <li><a href="#">HTML & CSS</a></li>
+                <li><a href="#">JavaScript</a></li>
+                <li><a href="#">PHP & MySQL</a></li>
+              </ul>
+            </li>
+            <li>
               <div class="icon-link">
                 <a href="{{( url_for('product.shop_dashboard'))}}">
                   <i class='bx bx-book-alt'></i>
@@ -229,8 +244,47 @@
             {% endif %}
             {% if g.user.is_admin %}
             <li>
+              <a href="{{ url_for('auth.admin_dashboard') }}">
+                <i class='bx bx-grid-alt'></i>
+                <span class="link_name">Dashboard</span>
+              </a>
+              <ul class="sub-menu blank">
+                <li><a class="link_name" href="#">Dashboard</a></li>
+              </ul>
+            </li>
+            <li>
               <div class="icon-link">
                 <a href="#">
+                  <i class='bx bx-collection'></i>
+                  <span class="link_name">Category</span>
+                </a>
+                <i class='bx bxs-chevron-down arrow'></i>
+              </div>
+              <ul class="sub-menu">
+                <li><a class="link_name" href="#">Category</a></li>
+                <li><a href="#">HTML & CSS</a></li>
+                <li><a href="#">JavaScript</a></li>
+                <li><a href="#">PHP & MySQL</a></li>
+              </ul>
+            </li>
+            <li>
+              <div class="icon-link">
+                <a href="{{( url_for('auth.all_product'))}}">
+                  <i class='bx bx-book-alt'></i>
+                  <span class="link_name">Products</span>
+                </a>
+                <i class='bx bxs-chevron-down arrow'></i>
+              </div>
+              <ul class="sub-menu">
+                <li><a class="link_name" href="#">Products</a></li>
+                <li><a href="#">Web Design</a></li>
+                <li><a href="#">Login Form</a></li>
+                <li><a href="#">Card Design</a></li>
+              </ul>
+            </li>
+            <li>
+              <div class="icon-link">
+                <a href="{{ url_for('auth.all_orders') }}">
                   <i class='bx bx-book-alt'></i>
                   <span class="link_name">Orders</span>
                 </a>
@@ -268,6 +322,21 @@
               </div>
               <ul class="sub-menu">
                 <li><a class="link_name" href="#">Shop</a></li>
+                <li><a href="#">Web Design</a></li>
+                <li><a href="#">Login Form</a></li>
+                <li><a href="#">Card Design</a></li>
+              </ul>
+            </li>
+            <li>
+              <div class="icon-link">
+                <a href="{{( url_for('auth.admin_sale'))}}">
+                  <i class='bx bx-book-alt'></i>
+                  <span class="link_name">Sales</span>
+                </a>
+                <i class='bx bxs-chevron-down arrow'></i>
+              </div>
+              <ul class="sub-menu">
+                <li><a class="link_name" href="#">Sales</a></li>
                 <li><a href="#">Web Design</a></li>
                 <li><a href="#">Login Form</a></li>
                 <li><a href="#">Card Design</a></li>

@@ -47,12 +47,8 @@ def shop_dashboard():
 @prod_bp.route("/create_product", methods=['POST','GET'])
 def create_product():
     r_user_id = session.get('r_user_id')
-    print('r_user_id',r_user_id)
     user = Userdata.query.get(r_user_id)
-    print(user)
-    # user = db_session.query(Userdata).get(r_user_id)
-
-    if request.method == 'POST' and user.is_shopuser:
+    if request.method == 'POST' and (user.is_shopuser or user.is_admin):
 
         category_id = request.form.get('category_id')
         product_name = request.form.get('product_name')
