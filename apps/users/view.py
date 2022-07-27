@@ -1,21 +1,21 @@
+"""Operation related to user"""
 import os
 import datetime
 import functools
 from random import randint
-from flask import current_app
 from flask_mail import Mail, Message
-from flask import jsonify, abort
-from flask import (Blueprint, flash, g, redirect, render_template, request, session, url_for)
+from flask import (Blueprint, flash, g, redirect, render_template, request,
+                   session, url_for, abort, current_app)
 from werkzeug.security import check_password_hash, generate_password_hash
-
-from apps.users.models import Userdata, OTP, Shop, ShopRejection, Wishlist, Cart,Orders,OrderDetail,Status,Payment
-from apps.products.models import Product,Category
-
-from dbConfig import db
-
 from sqlalchemy import create_engine, desc
-from sqlalchemy.orm import sessionmaker, scoped_session
+from sqlalchemy.orm import sessionmaker
 from sqlalchemy.sql import func
+
+from apps.users.models import Userdata, OTP, Shop, ShopRejection, Wishlist, Cart, Orders, OrderDetail, Status, Payment
+from apps.products.models import Product, Category
+
+# from dbConfig import db
+
 
 # some_engine = create_engine('postgresql+psycopg2://admin:admin@localhost/ecommerce')
 some_engine = create_engine('postgresql+psycopg2://admin:admin@localhost:5432/testShop')
@@ -31,128 +31,148 @@ bp = Blueprint('auth', __name__, url_prefix='/auth')
 
 @bp.route("/shop_orders")
 def order_for_shopuser():
+    """order received by shop"""
     r_user_id = session.get('r_user_id')
     user = db_session.query(Userdata).get(r_user_id)
     if user.is_shopuser:
-        shop_user = Userdata.query.filter(Userdata.id==user.id).first();
+        shop_user = Userdata.query.filter(Userdata.id == user.id).first()
         ids = [product.id for product in shop_user.product]
-        orders= OrderDetail.query.filter(OrderDetail.product_id.in_(ids)).all()
+        orders = OrderDetail.query.filter(OrderDetail.product_id.in_(ids)).all()
         return render_template("user/shopOrders.html", orders=orders)
 
 
-@bp.route("/admin_dashboard/",methods=['POST','GET'])
+@bp.route("/admin_dashboard/", methods=['POST', 'GET'])
 def admin_dashboard():
+    """to show admin dashboard"""
     r_user_id = session.get('r_user_id')
     user = db_session.query(Userdata).get(r_user_id)
-    shops = Shop.query.filter(Shop.active==True).all()
+    shops = Shop.query.filter(Shop.active == True).all()
     brand = Product.query.distinct(Product.brand)
-    customer = Userdata.query.filter(Userdata.is_customer==True).all()
-    
-    if user.is_admin and request.method=='POST':
+    customer = Userdata.query.filter(Userdata.is_customer == True).all()
+
+    if user.is_admin and request.method == 'POST':
         if request.form.get('shop_products'):
-            products= Product.query.filter(Product.shop_id==request.form.get('shop_products')).all()
-            return render_template("admindashboard.html",shops=shops,brand=brand
-            ,customer=customer,products=products)
-        
+            products = Product.query.filter(Product.shop_id == request.form.get('shop_products')).all()
+            return render_template("admindashboard.html", shops=shops, brand=brand
+                                   , customer=customer, products=products)
+
         if request.form.get('shop_orders'):
-            shop= Shop.query.filter(Shop.id== request.form.get('shop_orders')).first()
-            shop_user = Userdata.query.filter(Userdata.id==shop.user_id).first();
+            shop = Shop.query.filter(Shop.id == request.form.get('shop_orders')).first()
+            shop_user = Userdata.query.filter(Userdata.id == shop.user_id).first()
             ids = [product.id for product in shop_user.product]
-            shop_orders= OrderDetail.query.filter(OrderDetail.product_id.in_(ids)).all()
-            return render_template("admindashboard.html",shops=shops,brand=brand
-            ,customer=customer,shop_orders=shop_orders)
+            shop_orders = OrderDetail.query.filter(OrderDetail.product_id.in_(ids)).all()
+            return render_template("admindashboard.html", shops=shops, brand=brand
+                                   , customer=customer, shop_orders=shop_orders)
 
         if request.form.get('customer_orders'):
-            customer_order= Orders.query.filter(Orders.user_id==request.form.get('customer_orders')).all()
-            return render_template("admindashboard.html",shops=shops,brand=brand,
-            customer=customer,customer_order=customer_order,)
+            customer_order = Orders.query.filter(Orders.user_id == request.form.get('customer_orders')).all()
+            return render_template("admindashboard.html", shops=shops, brand=brand,
+                                   customer=customer, customer_order=customer_order, )
 
-    return render_template("admindashboard.html",shops=shops,brand=brand,customer=customer)
+    return render_template("admindashboard.html", shops=shops, brand=brand, customer=customer)
 
 
-@bp.route("/all_product/",methods=['POST','GET'])
+@bp.route("/all_product/", methods=['POST', 'GET'])
 def all_product():
+    """to show all product"""
     # r_user_id = session.get('r_user_id')
     # user = db_session.query(Userdata).get(r_user_id)
-    products= Product.query.all()
-    return render_template("product/allProduct.html",products=products)
+    products = Product.query.all()
+    return render_template("product/allProduct.html", products=products)
 
-@bp.route("/all_orders/",methods=['POST','GET'])
+@bp.route("/all_category/", methods=['POST', 'GET'])
+def all_category():
+    """to show all product"""
+    # r_user_id = session.get('r_user_id')
+    # user = db_session.query(Userdata).get(r_user_id)
+    category = Category.query.all()
+    return render_template("product/allcategory.html", category=category)
+
+@bp.route("/all_orders/", methods=['POST', 'GET'])
 def all_orders():
+    """to show all orders"""
+
     # r_user_id = session.get('r_user_id')
     # user = db_session.query(Userdata).get(r_user_id)
-    orders= Orders.query.all()
-    return render_template("product/allorders.html",orders=orders)
+    orders = Orders.query.all()
+    return render_template("product/allorders.html", orders=orders)
 
-@bp.route("/admin_sale/", methods=['POST','GET'])
+
+@bp.route("/admin_sale/", methods=['POST', 'GET'])
 def admin_sale():
+    """to show all sale to admin user"""
     r_user_id = session.get('r_user_id')
     user = db_session.query(Userdata).get(r_user_id)
-    shops = Shop.query.filter(Shop.active==True).all()
+    shops = Shop.query.filter(Shop.active == True).all()
     category = Category.query.all()
     brand = Product.query.distinct(Product.brand)
-    if user.is_admin and request.method=='POST':
+    if user.is_admin and request.method == 'POST':
 
         if request.form.get('shop'):
             wise = "shop"
             data = Shop.query.get(request.form.get('shop'))
-            product = db_session.query(Product).filter(Product.shop_id==request.form.get('shop'))
-            
+            product = db_session.query(Product).filter(Product.shop_id == request.form.get('shop'))
+
         if request.form.get('category'):
             wise = "category"
             data = Category.query.get(request.form.get('category'))
-            product = db_session.query(Product).filter(Product.category_id==request.form.get('category'))
+            product = db_session.query(Product).filter(Product.category_id == request.form.get('category'))
 
         if request.form.get('brand'):
             wise = "brand"
             data = request.form.get('brand')
-            product = db_session.query(Product).filter(Product.brand==request.form.get('brand'))
-        
+            product = db_session.query(Product).filter(Product.brand == request.form.get('brand'))
+
         sold = product.with_entities(func.sum(Product.sold_quantity)).scalar()
         total = product.with_entities(func.sum(Product.stock_quantity)).scalar()
-        return render_template("adminSaleDashboard.html",shops=shops,category=category,
-        brand=brand,total_qnt=total,total_sold= sold,wise=wise,data=data)
+        return render_template("adminSaleDashboard.html", shops=shops, category=category,
+                               brand=brand, total_qnt=total, total_sold=sold, wise=wise, data=data)
 
-    return render_template("adminSaleDashboard.html",shops=shops,category=category,brand=brand,
-    total_qnt=None,total_sold= None,wise=None,data=None)
+    return render_template("adminSaleDashboard.html", shops=shops, category=category, brand=brand,
+                           total_qnt=None, total_sold=None, wise=None, data=None)
 
 
-@bp.route("/shop_sale/", methods=['POST','GET'])
+@bp.route("/shop_sale/", methods=['POST', 'GET'])
 def shop_sale():
+    """to show all sale to shop user"""
     r_user_id = session.get('r_user_id')
     user = db_session.query(Userdata).get(r_user_id)
-    total_qnt=0
-    total_sold=0
+    total_qnt = 0
+    total_sold = 0
     category = Category.query.all()
     brand = Product.query.distinct(Product.brand)
-    shops = Shop.query.filter(Shop.active==True).all()
 
-    if user.is_admin and request.method=='POST':
+    if user.is_shopuser and request.method == 'POST':
         data = request.form.get('data')
 
         if data.isdigit():
-            product= Product.query.filter(Product.category_id==int(data),Product.user_id==user.id).all()
+            product = Product.query.filter(Product.category_id == int(data), Product.user_id == user.id).all()
         else:
-            product= Product.query.filter(Product.brand==data,Product.user_id==user.id).all()
+            product = Product.query.filter(Product.brand == data, Product.user_id == user.id).all()
         for prod in product:
             total_qnt = total_qnt + prod.stock_quantity
             total_sold = total_sold + prod.sold_quantity
-        return render_template("shopdashboard.html",category=category,
-            brand=brand,total_qnt=total_qnt,total_sold= total_sold)
-    return render_template("shopdashboard.html",category=category,brand=brand)
+        return render_template("shopdashboard.html", category=category,
+                               brand=brand, total_qnt=total_qnt, total_sold=total_sold)
+    return render_template("shopdashboard.html", category=category, brand=brand)
 
 
 @bp.route("/user_list")
 def user_list():
+    """to show all users admin user"""
+
     r_user_id = session.get('r_user_id')
     user = db_session.query(Userdata).get(r_user_id)
     if user.is_admin:
-        users = db_session.query(Userdata).filter((Userdata.is_customer==True)|(Userdata.is_shopuser==True)).all()
+        users = db_session.query(Userdata).filter(
+            (Userdata.is_customer == True) |
+            (Userdata.is_shopuser == True)).all()
         return render_template("user/userlist.html", users=users)
 
 
 @bp.route("/add_user", methods=['GET', 'POST'])
 def add_user():
+    """to add users"""
     r_user_id = session.get('r_user_id')
     user = db_session.query(Userdata).get(r_user_id)
     if user.is_admin:
@@ -168,15 +188,15 @@ def add_user():
 
             if not username:
                 error = 'Username is required.'
-            if not password:
+            elif not password:
                 error = 'password is required.'
-            if not full_name:
+            elif not full_name:
                 error = 'full name is required.'
-            if not email:
+            elif not email:
                 error = 'email is required.'
-            if not address:
+            elif not address:
                 error = 'address is required.'
-            if not gender:
+            elif not gender:
                 error = 'gender is required.'
             elif not dob:
                 error = 'dob is required.'
@@ -186,7 +206,8 @@ def add_user():
                 try:
                     user = Userdata(full_name=full_name, email=email, username=username,
                                     password=generate_password_hash(password),
-                                    address=address, gender=gender, dob=dob, active=True, is_admin=False, is_customer=True,
+                                    address=address, gender=gender, dob=dob, active=True, is_admin=False,
+                                    is_customer=True,
                                     is_shopuser=False, created_at=date,
                                     updated_at=date)
                     db_session.add(user)
@@ -202,6 +223,8 @@ def add_user():
 
 @bp.route("/shop_approval_list")
 def shop_approval_list():
+    """to show all shop approval shop to admin user"""
+
     r_user_id = session.get('r_user_id')
     user = db_session.query(Userdata).get(r_user_id)
     if user.is_admin:
@@ -210,46 +233,76 @@ def shop_approval_list():
         return render_template("user/shoplist.html", shops=shops)
     return redirect(url_for("auth.login"))
 
-@bp.route("/product_list")
+
+@bp.route("/product_list", methods=['GET', 'POST'])
 def product_list():
+    """to show all products user"""
+    category = Category.query.all()
+    brand = Product.query.distinct(Product.brand)
+
+    search = request.args.get('search')  # product_name
+    sort = request.args.get('sort')  # price , rating
+    # filterBy = request.args.get('filterBy')  # category, prices, brand,
+
     page = request.args.get('page', 1, type=int)
-    products = Product.query.paginate(page=page, per_page=3)
-    return render_template("index.html", products=products)
+    products = Product.query.paginate(page=page, per_page=6)
+
+    if request.method == 'POST':
+        min, max = request.form.get('price').split('-')
+        cat = request.form.get('category')
+        brd = request.form.get('brand')
+
+        products = Product.query.filter(Product.price > int(min), Product.price < int(max),
+                                        Product.category_id == cat, Product.brand == brd).paginate(page=page, per_page=6)
+        return render_template("index.html", products=products, user=search,
+                               category=category, brand=brand)
+    if search:
+        products = Product.query.filter(Product.product_name.like("%" + search + "%")).paginate(page=page, per_page=6)
+
+    if sort == 'price':
+        if request.args.get('price') == 'high':
+            products = Product.query.order_by(Product.price.desc()).paginate(page=page, per_page=6)
+        else:
+            products = Product.query.order_by(Product.price.asc()).paginate(page=page, per_page=6)
+
+    return render_template("index.html", products=products, user=search,
+                           category=category, brand=brand)
 
 
-
-
-@bp.route("/wishlist", methods=['POST','GET'])
+@bp.route("/wishlist", methods=['POST', 'GET'])
 def wishlist():
+    """to show  wishlist user"""
     r_user_id = session.get('r_user_id')
     user = db_session.query(Userdata).get(r_user_id)
     if user.is_customer:
-        wl = db_session.query(Wishlist).filter(Wishlist.user_id==r_user_id).first()
-        products = db_session.query(Product).filter(Product.id.in_(wl.product_id)).all()
-        if wl:
+        wish = db_session.query(Wishlist).filter(Wishlist.user_id == r_user_id).first()
+        products = db_session.query(Product).filter(Product.id.in_(wish.product_id)).all()
+        if wish:
             return render_template("user/wishlish.html", products=products)
         else:
             return redirect(url_for("auth.product_list"))
 
 
-
 @bp.route("/place_order")
 def place_order():
+    """function to place order"""
     r_user_id = session.get('r_user_id')
     user = db_session.query(Userdata).get(r_user_id)
     date = datetime.datetime.now()
     if user.is_customer:
-        cart = db_session.query(Cart).filter(Cart.user_id==r_user_id).first();
+        cart = db_session.query(Cart).filter(Cart.user_id == r_user_id).first()
         order = Orders(user_id=r_user_id, status=Status.StatusInit, payment=Payment.paid,
-                        created_at=date,updated_at=date)
+                       created_at=date, updated_at=date)
         db_session.add(order)
         db_session.commit()
-        for item,qnt in cart.items.items():
-            product = db_session.query(Product).filter(Product.id==item).first()
-            orderdetail = OrderDetail(order_id=order.id, product_id=item, 
-                        quantity=qnt,price=product.price,
-                        created_at=date,updated_at=date)
+        for item, qnt in cart.items.items():
+            product = db_session.query(Product).filter(Product.id == item).first()
+            orderdetail = OrderDetail(order_id=order.id, product_id=item,
+                                      quantity=qnt, price=product.price,
+                                      created_at=date, updated_at=date)
             db_session.add(orderdetail)
+            product.sold_quantity=product.sold_quantity+qnt
+            db_session.query(Product).filter(Product.id == item).update({'sold_quantity':product.sold_quantity})
             db_session.commit()
 
         db_session.query(Cart).filter(Cart.id == cart.id).update({'items': {}})
@@ -257,130 +310,139 @@ def place_order():
         return redirect(url_for("auth.product_list"))
     return redirect(url_for("auth.login"))
 
+
 @bp.route("/order_detail/<order_id>")
 def order_detail(order_id):
+    """to show order detail of user"""
+
     r_user_id = session.get('r_user_id')
     user = db_session.query(Userdata).get(r_user_id)
     if user:
-        order_detail = db_session.query(OrderDetail).filter(OrderDetail.order_id==order_id).all()
-        return render_template("user/orderDetail.html", order_detail=order_detail,order_id=order_id)
+        order_detail = db_session.query(OrderDetail).filter(OrderDetail.order_id == order_id).all()
+        return render_template("user/orderDetail.html", order_detail=order_detail, order_id=order_id)
     return abort(401, "You have to provide either 'url' or 'text', too")
+
 
 @bp.route("/cancel_order/<order_id>")
 def cancel_order(order_id):
+    """to cancel user order"""
     r_user_id = session.get('r_user_id')
     user = db_session.query(Userdata).get(r_user_id)
-    if user.is_customer:        
-        db_session.query(Orders).filter(Orders.id==order_id).update({'status':Status.StatusCancelled})
+    if user.is_customer:
+        db_session.query(Orders).filter(Orders.id == order_id).update({'status': Status.StatusCancelled})
         db_session.commit()
         return redirect(url_for("auth.orders"))
 
 
 @bp.route("/orders")
 def orders():
+    """to show users orders"""
     r_user_id = session.get('r_user_id')
     user = db_session.query(Userdata).get(r_user_id)
     if user.is_customer:
         orders = Orders.query.all()
-        return render_template('user/orderlist.html',orders=orders)
+        return render_template('user/orderlist.html', orders=orders)
     return redirect(url_for("auth.login"))
 
 
-@bp.route("/add_wishlist/<prod_id>", methods=['POST','GET'])
+@bp.route("/add_wishlist/<prod_id>", methods=['POST', 'GET'])
 def add_wishlist(prod_id):
+    """to add product on wishlist"""
     r_user_id = session.get('r_user_id')
     user = db_session.query(Userdata).get(r_user_id)
     date = datetime.datetime.now()
 
     if user.is_customer and prod_id:
-        wl = db_session.query(Wishlist).filter(Wishlist.user_id==r_user_id).first()
-        if not wl:
-            wishlist = Wishlist(user_id=user.id, product_id=[prod_id],created_at=date,
-                                   updated_at=date)
+        wish_list = db_session.query(Wishlist).filter(Wishlist.user_id == r_user_id).first()
+        if not wish_list:
+            wishlist = Wishlist(user_id=user.id, product_id=[prod_id], created_at=date,
+                                updated_at=date)
             db_session.add(wishlist)
             db_session.commit()
         else:
-            wl_id=wl.product_id
+            wl_id = wish_list.product_id
             wl_id.append(int(prod_id))
-            db_session.query(Wishlist).filter(Wishlist.id == wl.id).update({'product_id': list(set(wl_id))})
+            db_session.query(Wishlist).filter(Wishlist.id == wish_list.id).update({'product_id': list(set(wl_id))})
             db_session.commit()
-        wl = db_session.query(Wishlist).filter(Wishlist.user_id==r_user_id).first()
         return redirect(url_for("auth.product_list"))
     return redirect(url_for("auth.login"))
 
 
-@bp.route("/delete_wishlist/<prod_id>", methods=['POST','GET'])
+@bp.route("/delete_wishlist/<prod_id>", methods=['POST', 'GET'])
 def delete_wishlist(prod_id):
+    """to delete product from wishlish"""
     r_user_id = session.get('r_user_id')
     user = db_session.query(Userdata).get(r_user_id)
 
     if user.is_customer and prod_id:
-        wl = db_session.query(Wishlist).filter(Wishlist.user_id==r_user_id).first()
-        wl_id=wl.product_id
+        wish_list = db_session.query(Wishlist).filter(Wishlist.user_id == r_user_id).first()
+        wl_id = wish_list.product_id
         wl_id.remove(int(prod_id))
-        db_session.query(Wishlist).filter(Wishlist.id == wl.id).update({'product_id': list(set(wl_id))})
+        db_session.query(Wishlist).filter(Wishlist.id == wish_list.id).update({'product_id': list(set(wl_id))})
         db_session.commit()
         return redirect(url_for("auth.wishlist"))
 
 
-@bp.route("/cart", methods=['POST','GET'])
+@bp.route("/cart", methods=['POST', 'GET'])
 def cart():
+    """to show cart of user"""
     r_user_id = session.get('r_user_id')
     user = db_session.query(Userdata).get(r_user_id)
-    
+
     if user.is_customer:
-        cart = db_session.query(Cart).filter(Cart.user_id==r_user_id).first()
-        ids =[id for id in cart.items.keys()]
-        qty =[qt for qt in cart.items.values()]
-        products = db_session.query(Product).filter(Product.id.in_(ids)).all()
+        cart = db_session.query(Cart).filter(Cart.user_id == r_user_id).first()
+        # ids = [id for id in cart.items.keys()]
+        # qty = [qt for qt in cart.items.values()]
+        # products = db_session.query(Product).filter(Product.id.in_(ids)).all()
         if cart:
             return render_template("user/cart.html", cart=cart)
-        else:
-            return render_template("user/cart.html")
+        return render_template("user/cart.html")
 
 
-@bp.route("/add_cart/<prod_id>/<page>", methods=['POST','GET'])
-def add_cart(prod_id,page):
+@bp.route("/add_cart/<prod_id>/<page>", methods=['POST', 'GET'])
+def add_cart(prod_id, page):
+    """to add product in cart"""
     r_user_id = session.get('r_user_id')
     user = db_session.query(Userdata).get(r_user_id)
     date = datetime.datetime.now()
 
-    wl = db_session.query(Wishlist).filter(Wishlist.user_id==r_user_id).first()
+    wl = db_session.query(Wishlist).filter(Wishlist.user_id == r_user_id).first()
 
     if wl and int(prod_id) in wl.product_id:
-        wl_id=wl.product_id
+        wl_id = wl.product_id
         wl_id.remove(int(prod_id))
         db_session.query(Wishlist).filter(Wishlist.id == wl.id).update({'product_id': list(set(wl_id))})
         db_session.commit()
 
     if user.is_customer and prod_id:
-        cart = db_session.query(Cart).filter(Cart.user_id==r_user_id).first()
+        cart = db_session.query(Cart).filter(Cart.user_id == r_user_id).first()
         if not cart:
-            items={}
-            items[prod_id]=1
-            add_cart = Cart(user_id=user.id, items=items,created_at=date,
-                                   updated_at=date)
+            items = {}
+            items[prod_id] = 1
+            add_cart = Cart(user_id=user.id, items=items, created_at=date,
+                            updated_at=date)
             db_session.add(add_cart)
             db_session.commit()
         else:
-            items=cart.items
+            items = cart.items
             if items.get(prod_id):
-                items[prod_id] =items[prod_id]+1
+                items[prod_id] = items[prod_id] + 1
             else:
-                items[prod_id]=1
+                items[prod_id] = 1
             db_session.query(Cart).filter(Cart.id == cart.id).update({'items': items})
             db_session.commit()
-        if page=="wish":
+        if page == "wish":
             return redirect(url_for("auth.wishlist"))
-        if page=="cart":
+        if page == "cart":
             return redirect(url_for("auth.cart"))
-        if page=="index":
+        if page == "index":
             return redirect(url_for("auth.product_list"))
     return redirect(url_for("auth.login"))
 
 
-@bp.route("/delete_cart/<prod_id>", methods=['POST','GET'])
+@bp.route("/delete_cart/<prod_id>", methods=['POST', 'GET'])
 def delete_cart(prod_id):
+    """to delete product from cart"""
     r_user_id = session.get('r_user_id')
     user = db_session.query(Userdata).get(r_user_id)
 
@@ -392,11 +454,11 @@ def delete_cart(prod_id):
     #     db_session.commit()
     #     return redirect(url_for("auth.cart"))
     if user.is_customer and prod_id:
-        cart = db_session.query(Cart).filter(Cart.user_id==r_user_id).first()
-        items=cart.items
-        if items.get(prod_id)>0:
-            items[prod_id] =items[prod_id]-1
-            if items.get(prod_id)<=0:
+        cart = db_session.query(Cart).filter(Cart.user_id == r_user_id).first()
+        items = cart.items
+        if items.get(prod_id) > 0:
+            items[prod_id] = items[prod_id] - 1
+            if items.get(prod_id) <= 0:
                 del items[prod_id]
         else:
             del items[prod_id]
@@ -408,6 +470,7 @@ def delete_cart(prod_id):
 
 @bp.route("/approval_shop/<id>")
 def approval_shop(id):
+    """function to approve shop"""
     r_user_id = session.get('r_user_id')
     user = db_session.query(Userdata).get(r_user_id)
     if user.is_admin:
@@ -421,6 +484,7 @@ def approval_shop(id):
 
 @bp.route("/reject_shop/<id>", methods=('GET', 'POST'))
 def reject_shop(id):
+    """to reject shop application"""
     if request.method == "POST":
         message = request.form.get('message')
         r_user_id = session.get('r_user_id')
@@ -452,6 +516,7 @@ def reject_shop(id):
 
 @bp.route("/register", methods=['GET', 'POST'])
 def register():
+    """function to register user"""
     if request.method == 'POST':
         full_name = request.form['full_name']
         email = request.form['email']
@@ -461,22 +526,21 @@ def register():
         address = request.form['address']
         gender = request.form['gender']
         dob = request.form['dob']
-        # user_type = request.form['user_type']
         error = None
 
         if not username:
             error = 'Username is required.'
-        if not password:
+        elif not password:
             error = 'password is required.'
-        if conpassword != password:
+        elif conpassword != password:
             error = 'password not match.'
-        if not full_name:
+        elif not full_name:
             error = 'full name is required.'
-        if not email:
+        elif not email:
             error = 'email is required.'
-        if not address:
+        elif not address:
             error = 'address is required.'
-        if not gender:
+        elif not gender:
             error = 'gender is required.'
         elif not dob:
             error = 'dob is required.'
@@ -501,7 +565,7 @@ def register():
                 db_session.add(otp_object)
                 db_session.commit()
                 msg = Message(
-                  f'your otp is {otp}',
+                    f'your otp is {otp}',
                     sender='avaish@deqode.com',
                     recipients=[email]
                 )
@@ -519,6 +583,7 @@ def register():
 
 @bp.route("/shop_user_register", methods=['GET', 'POST'])
 def shop_user_register():
+    """to register shop user"""
     if request.method == 'POST':
         full_name = request.form['full_name']
         email = request.form['email']
@@ -605,6 +670,7 @@ def shop_user_register():
 
 @bp.route('/login', methods=('GET', 'POST'))
 def login():
+    """to login user"""
     if request.method == 'POST':
         user_name = request.form['username']
         password = request.form['password']
@@ -633,8 +699,7 @@ def login():
                 session.clear()
                 session['r_user_id'] = user.id
                 return redirect(url_for("product.shop_dashboard"))
-            else:
-                error = "your shop is not approved yet"
+            error = "your shop is not approved yet"
 
         else:
             error = "Please verify your email to login"
@@ -645,10 +710,10 @@ def login():
 
 @bp.route('/verify', methods=('POST',))
 def verify():
+    """ function to verify otp"""
     if request.method == 'POST':
         r_user_id = session.get('r_user_id')
         otp = int(request.form['otp'])
-        error = None
         otp_db = db_session.query(OTP).filter(OTP.user_id == r_user_id).order_by(desc(OTP.created_at)).first()
         if otp == otp_db.otp:
             db_session.query(Userdata).filter(Userdata.id == r_user_id).update({'active': True})
@@ -657,10 +722,12 @@ def verify():
             db_session.commit()
             return redirect(url_for("auth.login"))
         return "incorrect Otp"
+    return abort(401, "You have to provide either 'url' or 'text', too")
 
 
 @bp.route('/logout')
 def logout():
+    """to logout user"""
     session.clear()
     return redirect(url_for("auth.login"))
 
@@ -680,6 +747,7 @@ def logout():
 
 @bp.route("/reset_password/<token>", methods=['GET', 'POST'])
 def reset_token(token):
+    """to reset token"""
     # if current_user.is_authenticated:
     #     return redirect(url_for('home'))
     user_id = Userdata.verify_reset_token(token)
@@ -694,20 +762,22 @@ def reset_token(token):
 
         if password is None:
             error = 'password is required field.'
-        if confirm_pass is None:
+        elif confirm_pass is None:
             error = 'confimr password is required field.'
         elif password != confirm_pass:
             error = 'password dont match.'
 
-        db_session.query(Userdata).filter(Userdata.id == user.id).update({'password': generate_password_hash(password)})
-        db_session.commit()
-        flash('Your password has been updated! You are now able to log in', 'success')
-        return redirect(url_for('auth.login'))
+        if not error:
+            db_session.query(Userdata).filter(Userdata.id == user.id).update({'password': generate_password_hash(password)})
+            db_session.commit()
+            flash('Your password has been updated! You are now able to log in', 'success')
+            return redirect(url_for('auth.login'))
     return render_template('user/resetpassword.html')
 
 
 @bp.route('/forgot_password', methods=['GET', 'POST'])
 def forgot_password():
+    """to reset password"""
     if request.method == 'POST':
         username = request.form.get('username')
         user = db_session.query(Userdata).filter_by(username=username).first()
@@ -726,6 +796,7 @@ def forgot_password():
 
 @bp.route('/update_profile', methods=['GET', 'POST'])
 def update_profile():
+    """update user profile"""
     if request.method == 'POST':
         full_name = request.form.get('full_name')
         # email = request.form.get('email')
@@ -772,8 +843,8 @@ def update_profile():
                     update_object["gender"] = gender
                 if dob and user.dob != dob:
                     update_object["dob"] = dob
-                print(update_object)
-                user = db_session.query(Userdata).filter(Userdata.id == r_user_id).update(update_object)
+                update_object["updated_at"] = date
+                db_session.query(Userdata).filter(Userdata.id == r_user_id).update(update_object)
                 db_session.commit()
 
             except:
@@ -803,6 +874,7 @@ def update_profile():
 
 @bp.before_app_request
 def load_logged_in_user():
+    """ logged user"""
     user_id = session.get('r_user_id')
 
     if user_id is None:
@@ -812,6 +884,7 @@ def load_logged_in_user():
 
 
 def login_required(view):
+    """ function to check logged-in user"""
     @functools.wraps(view)
     def wrapped_view(**kwargs):
         if g.user is None:

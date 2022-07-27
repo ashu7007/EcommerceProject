@@ -1,12 +1,14 @@
 import enum
-import datetime
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 from flask import current_app
-from apps import db_sql
 from sqlalchemy.dialects.postgresql import JSON
+
+from apps import db_sql
+
 # from dbConfig.db import db
 
 db = db_sql
+
 
 class Userdata(db.Model):
     __tablename__ = 'userdata'
@@ -24,11 +26,11 @@ class Userdata(db.Model):
     is_shopuser = db.Column(db.Boolean, nullable=False)
     created_at = db.Column(db.DateTime)
     updated_at = db.Column(db.DateTime)
-    shop = db.relationship('Shop', backref='shops',lazy=True)
-    order = db.relationship('Orders', backref='user',lazy=True)
-    product = db.relationship('Product', backref='shopuser',lazy=True)
-    # wishlist = db.relationship("Wishlist", back_populates="user")
+    shop = db.relationship('Shop', backref='shops', lazy=True)
+    order = db.relationship('Orders', backref='user', lazy=True)
+    product = db.relationship('Product', backref='shopuser', lazy=True)
 
+    # wishlist = db.relationship("Wishlist", back_populates="user")
 
     def get_reset_token(self, expires_sec=300):
         s = Serializer(current_app.config['SECRET_KEY'], expires_sec)
@@ -48,6 +50,7 @@ class Userdata(db.Model):
 
 
 class Wishlist(db.Model):
+    """model for Wishlist"""
     __tablename__ = 'wishlist'
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('userdata.id'))
@@ -60,6 +63,7 @@ class Wishlist(db.Model):
 
 
 class Cart(db.Model):
+    """model for cart"""
     __tablename__ = 'cart'
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('userdata.id'))
@@ -69,6 +73,7 @@ class Cart(db.Model):
 
     def __repr__(self):
         return f"Cart'{self.id}')"
+
 
 class Status(enum.Enum):
     StatusInit = 0
@@ -83,6 +88,8 @@ class Payment(enum.Enum):
 
 
 class Orders(db.Model):
+    """model for Order"""
+
     __tablename__ = 'orders'
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('userdata.id'))
@@ -90,14 +97,15 @@ class Orders(db.Model):
     payment = db.Column(db.Enum(Payment))
     created_at = db.Column(db.DateTime)
     updated_at = db.Column(db.DateTime)
-    orderdetail = db.relationship('OrderDetail', backref='order',lazy=True)
-
+    orderdetail = db.relationship('OrderDetail', backref='order', lazy=True)
 
     def __repr__(self):
         return f"Order'{self.id} status{self.status}')"
 
 
 class OrderDetail(db.Model):
+    """model for OrderDetail"""
+
     __tablename__ = 'orderdetail'
 
     id = db.Column(db.Integer, primary_key=True)
@@ -113,6 +121,8 @@ class OrderDetail(db.Model):
 
 
 class OTP(db.Model):
+    """model for otp"""
+
     __tablename__ = 'otp'
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('userdata.id'))
@@ -125,6 +135,7 @@ class OTP(db.Model):
 
 
 class Shop(db.Model):
+    """model for shop"""
     __tablename__ = 'shop'
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('userdata.id'))
@@ -134,14 +145,15 @@ class Shop(db.Model):
     status = db.Column(db.String(10), nullable=False)
     created_at = db.Column(db.DateTime)
     updated_at = db.Column(db.DateTime)
+
     # user = db.relationship(Userdata, backref='shops')
-    
 
     def __repr__(self):
         return f"'{self.id}','{self.store_name}'"
 
 
 class ShopRejection(db.Model):
+    """model for shop rejection"""
     __tablename__ = 'shoprejection'
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('userdata.id'))

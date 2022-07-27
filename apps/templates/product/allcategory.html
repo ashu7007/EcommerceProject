@@ -1,0 +1,106 @@
+{% extends 'base.html' %}
+{% block header %}
+  <h1 class="d-flex justify-content-center">{% block title %}Categories{% endblock %}</h1>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+<div class="d-flex justify-content-end my-4 ">
+  <a href="{{ url_for('product.add_category') }}" >
+      <input class="btn btn-secondary btn-sm " type=submit value="Add Category" >
+  </a>
+</div>
+<table id="table_id" class=" display table ">
+  <thead>
+    <tr>
+      
+      <th scope="col">id</th>
+      <th scope="col">category name</th>
+      <th scope="col">Action</th>
+
+    </tr>
+  </thead>
+  <tbody>
+      
+  {%for cat in category%}
+    <tr>
+      <th scope="row">{{cat.id}}</th>
+      <td>{{cat.category_name}}</td>
+      <td>
+          <div class="row">
+              <div class="col mb-2">
+                  <form class="f" action="{{ url_for('auth.approval_shop',id =cat.id) }}">
+                      <!-- <input hidden name="status" value="True" > -->
+                      <button type="button" class="btn btn-warning btn-sm" style="width:100%", data-toggle="modal" data-target="#{{cat.id}}update" data-whatever="@mdo">Update</button>
+                      <!-- <input class="btn btn-warning btn-sm" type=submit value="Update" style="width:100%"> -->
+                      </form>
+              </div>
+              
+          </div>
+         
+          </td>
+    </tr>
+
+
+    <div class="modal fade" id="{{cat.id}}update" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+          <div class="modal-dialog" role="document">
+                  <div class="modal-content">
+                          <div class="modal-header">
+                              <h5 class="modal-title" id="exampleModalLabel">Update Product</h5>
+                              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                  <span aria-hidden="true">&times;</span>
+                              </button>
+                          </div>
+                          <div class="modal-body ">
+                                <form action="{{ url_for('product.update_category',cat_id =cat.id) }}" method="post">
+                                  <div class="row">
+                                    <div class="col mb-3">
+                                      <label class="form-label" for="category">category name</label>
+                                      <input class="form-control" name="category" id="product_name" value="{{cat.category_name}}" required>
+                                    </div>
+                                   </div>
+
+                                  <div class="my-3">
+                                  <button type="button " class="btn btn-secondary btn-sm" data-dismiss="modal">Close</button>
+                                  <input class="btn btn-warning btn-sm" type=submit value="Update" >
+                                  </div>
+                              
+                              </form>
+                          </div>
+              
+                  </div>
+          </div>
+      </div>
+
+
+
+
+      <div class="modal fade" id="{{cat.id}}delete" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+          <div class="modal-dialog" role="document">
+                  <div class="modal-content">
+                          <div class="modal-header">
+                              <h5 class="modal-title" id="exampleModalLabel">Confirmation</h5>
+                              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                  <span aria-hidden="true">&times;</span>
+                              </button>
+                          </div>
+                          <div class="modal-body " >
+                                  <div class="form-group">
+                                  <label for="message-text" class="col-form-label">Are you sure want to delete {{cat.category_name}}</label>
+                                  </div>
+                                  <div class="my-3" id = "{{cat.id}}">
+                                  <button type="button " class="btn btn-secondary btn-sm" data-dismiss="modal">Close</button>
+                                  <a href="{{ url_for('product.delete',id =cat.id) }}">
+                                      <button type="button " class="btn btn-danger btn-sm" id="del">Delete</button>
+                                  </a>
+                                  </div>
+                          </div>
+              
+                  </div>
+          </div>
+      </div>
+    {% endfor %}
+  </tbody>
+</table>
+</div>
+{% endblock %}

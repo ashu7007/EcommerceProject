@@ -1,9 +1,9 @@
+"""main file of configuration and filters"""
 import os
 from flask import Flask
 from flask_bootstrap import Bootstrap
 # from dbConfig import db
 from flask_sqlalchemy import SQLAlchemy
-
 
 
 app = Flask(__name__)
@@ -12,18 +12,18 @@ app.config['SECRET_KEY'] = 'qwerty'
 Bootstrap(app)
 
 # DB configuration
-username = 'admin'
-password = 'admin'
-host_url = 'localhost'
-port = '5432'
+USERNAME = 'admin'
+PASSWORD = 'admin'
+HOST_URL = 'localhost'
+PORT = '5432'
 # db_name = 'ecommerce'
-db_name = 'testShop'
+DB_NAME = 'testShop'
 
 DB_URL = 'postgresql+psycopg2://{user}:{pw}@{url}/{db_name}'.format(
-    user=username, pw=password, url=host_url,  db_name=db_name)
+    user=USERNAME, pw=PASSWORD, url=HOST_URL, db_name=DB_NAME)
 app.config['SQLALCHEMY_DATABASE_URI'] = DB_URL
 # app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////tmp/test.db'
-db_sql=SQLAlchemy(app)
+db_sql = SQLAlchemy(app)
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False  # silence the deprecation warning
 
 # configuration of mail
@@ -37,61 +37,69 @@ app.config['MAIL_USE_SSL'] = True
 # db.init_app(app)
 # app.config.from_mapping(SECRET_KEY='dev',)
 
-from apps.users import view
-app.register_blueprint(view.bp)
-
-from apps.shop import views
-app.register_blueprint(views.bp)
-
-from apps.products import views
-app.register_blueprint(views.prod_bp)
+from apps.users.view import bp as bp_user
+app.register_blueprint(bp_user)
+from apps.shop.views import bp as bp_shop
+app.register_blueprint(bp_shop)
+from apps.products.views import prod_bp
+app.register_blueprint(prod_bp)
 
 
+# custom filter
 
-
-#custom filter
-from apps.products.models import Product
 from apps.users.models import OrderDetail, Orders
-
+from apps.products.models import Product
 @app.template_filter('product_name')
-def product_name(id):
-    product = Product.query.filter(Product.id==id).first()
+def product_name(product_id):
+    """ custom filter to get product name"""
+
+    product = Product.query.filter(Product.id == product_id).first()
     return product.product_name
 
+
 @app.template_filter('product_price')
-def product_price(id):
-    product = Product.query.filter(Product.id==id).first()
+def product_price(product_id):
+    """ custom filter to get product price"""
+    product = Product.query.filter(Product.id == product_id).first()
     return product.price
 
+
 @app.template_filter('product_brand')
-def product_brand(id):
-    product = Product.query.filter(Product.id==id).first()
+def product_brand(product_id):
+    """ custom filter to get product brand"""
+    product = Product.query.filter(Product.id == product_id).first()
     return product.brand
 
+
 @app.template_filter('total_price')
-def total_price(id):
-    orderdetail = OrderDetail.query.filter(OrderDetail.order_id==id).all()
-    total=0
-    for data in orderdetail:
-        total = total+(data.price*data.quantity)
+def total_price(order_id):
+    """ custom filter to get total price"""
+    order_detail = OrderDetail.query.filter(OrderDetail.order_id == order_id).all()
+    total = 0
+    for data in order_detail:
+        total = total + (data.price * data.quantity)
     return total
+
 
 @app.template_filter('customer_username')
 def customer_username(order_id):
-    order = Orders.query.filter(Orders.id==order_id).first()
+    """ custom filter for customer username"""
+    order = Orders.query.filter(Orders.id == order_id).first()
     return order.user.username
+
 
 @app.template_filter('customer_email')
 def customer_email(order_id):
-    order = Orders.query.filter(Orders.id==order_id).first()
+    """ custom filter for customer email"""
+    order = Orders.query.filter(Orders.id == order_id).first()
     return order.user.email
+
 
 @app.template_filter('customer_address')
 def customer_address(order_id):
-    order = Orders.query.filter(Orders.id==order_id).first()
+    """ custom filter for customer address"""
+    order = Orders.query.filter(Orders.id == order_id).first()
     return order.user.address
-
-
 
 # def create_app():
 #     app = Flask(__name__)

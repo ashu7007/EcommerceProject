@@ -10,7 +10,7 @@
     <div class="row">
         <div class="col mb-3">
         <form action="{{ url_for('auth.shop_sale') }}" method="POST">
-          <label class="form-label" for="gender">Category Wise Sale</label>
+          <label class="form-label" for="data">Category Wise Sale</label>
           <select class="form-select"  name="data" id="data" aria-label="Default select example">
             
             {% for cat in category %}
@@ -22,7 +22,7 @@
           </div>
           <div class="col mb-3">
             <form action="{{ url_for('auth.shop_sale') }}" method="POST">
-                <label class="form-label" for="gender">Category Wise Sale</label>
+                <label class="form-label" for="data">Category Wise Sale</label>
                 <select class="form-select"  name="data" id="data" aria-label="Default select example">
                   
                   {% for bn in brand %}

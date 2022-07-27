@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+
+
+{% block content %}
+<div class="card mx-auto" style="width: 40rem;">
+  <h1 class=" d-flex justify-content-center mx-4">ADD CATEGORY</h1>
+  <div class="card-body">
+    <form action="{{ url_for('product.add_category') }}" method="post">
+      <div class="row">
+        
+        <div class="col mb-3">
+          <label class="form-label" for="email">Category name</label>
+          <input class="form-control" name="category" id="product_name" required>
+        </div>
+       </div>
+ 
+    <div class="row mx-auto">
+   
+      <input class="btn btn-primary btn-block" type="submit" value="Add">
+    
+    
+    </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

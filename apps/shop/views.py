@@ -1,52 +1,43 @@
-from flask.views import MethodView ,View
-import os
+"""module related to shop operations"""
 import datetime
-import functools
-from random import randint
-from flask import current_app
-from flask_mail import Mail, Message
-from flask import (Blueprint, flash, g, redirect, render_template, request, session, url_for)
-from werkzeug.security import check_password_hash, generate_password_hash
+from flask import (Blueprint, flash, redirect, render_template, request, session, url_for,abort)
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+from werkzeug.security import generate_password_hash
 
+from apps.users.models import Shop, Userdata
 
-from  apps.users.models import Shop ,Userdata
-
-from dbConfig import db
-
-from sqlalchemy import create_engine, desc
-from sqlalchemy.orm import sessionmaker, scoped_session
-
-
-# some_engine = create_engine('postgresql+psycopg2://admin:admin@localhost/ecommerce')
 some_engine = create_engine('postgresql+psycopg2://admin:admin@localhost:5432/testShop')
 Session = sessionmaker(bind=some_engine)
 db_session = Session()
-
 bp = Blueprint('shop', __name__, url_prefix='/shop')
 
 
-
-@bp.route("/list_shop", methods=['POST','GET'])
+@bp.route("/list_shop", methods=['POST', 'GET'])
 def list_shop():
+    """function to list shop"""
     r_user_id = session.get('r_user_id')
     user = db_session.query(Userdata).get(r_user_id)
     if user.is_admin:
         shops = db_session.query(Shop).all()
         return render_template("shop/shoplist.html", shops=shops)
 
+    return abort(401, "You have to provide either 'url' or 'text', too")
 
-@bp.route("/create_shop", methods=['POST','GET'])
+
+@bp.route("/create_shop", methods=['POST', 'GET'])
 def create_shop():
+    """function to create shop"""
     if request.method == 'POST':
-        full_name = request.form['full_name']
-        email = request.form['email']
-        username = request.form['username']
-        password = request.form['password']
-        address = request.form['address']
-        gender = request.form['gender']
-        dob = request.form['dob']
-        store_name = request.form['store_name']
-        description = request.form['description']
+        full_name = request.form.get('full_name')
+        email = request.form.get("email")
+        username = request.form.get('username')
+        password = request.form.get('password')
+        address = request.form.get('address')
+        gender = request.form.get('gender')
+        dob = request.form.get('dob')
+        store_name = request.form.get('store_name')
+        description = request.form.get('description')
         error = None
 
         if not username:
@@ -74,14 +65,15 @@ def create_shop():
             try:
                 user = Userdata(full_name=full_name, email=email, username=username,
                                 password=generate_password_hash(password),
-                                address=address, gender=gender, dob=dob, active=False, is_admin=False,
+                                address=address, gender=gender, dob=dob, active=False,
+                                is_admin=False,
                                 is_customer=False, is_shopuser=True, created_at=date,
                                 updated_at=date)
                 db_session.add(user)
                 db_session.commit()
-                shop_object = Shop(user_id=user.id, store_name=store_name, description=description, 
-                                active=True,status="Approved",
-                                created_at=date, updated_at=date)
+                shop_object = Shop(user_id=user.id, store_name=store_name, description=description,
+                                   active=True, status="Approved",
+                                   created_at=date, updated_at=date)
                 db_session.add(shop_object)
                 db_session.commit()
 
@@ -92,218 +84,47 @@ def create_shop():
                 return redirect(url_for("shop.list_shop"))
                 # shops = db_session.query(Shop).all()
                 # return render_template("shop/shoplist.html", shops=shops)
-
         flash(error)
-
     return render_template('shop/adminShop.html')
 
 
-
-
-
-@bp.route("/delete_shop/<id>", methods=['POST','GET'])
+@bp.route("/delete_shop/<id>", methods=['POST', 'GET'])
 def delete_shop(id):
+    """function to delete shop"""
     r_user_id = session.get('r_user_id')
     user = db_session.query(Userdata).get(r_user_id)
     if user.is_admin:
-        shops = db_session.query(Shop).all()
         db_session.query(Shop).filter(Shop.id == id).delete()
         db_session.commit()
         return redirect(url_for("shop.list_shop"))
-        # return render_template("shop/shoplist.html", shops=shops)
-        
+
+    return abort(401, "You have to provide either 'url' or 'text', too")
 
 
-@bp.route("/update_shop/<id>", methods=['POST','GET'])
-def update_shop(id):
+@bp.route("/update_shop/<id>", methods=['POST', 'GET'])
+def update_shop(shop_id):
+    """function to update shop"""
     r_user_id = session.get('r_user_id')
     user = db_session.query(Userdata).get(r_user_id)
 
-    if request.method == 'POST'and user.is_admin:
+    if request.method == 'POST' and user.is_admin:
 
         store_name = request.form['store_name']
         description = request.form['description']
-        
-        error = None
 
         if not store_name:
             error = 'store name is required.'
         if not description:
             error = 'description is required.'
 
-        date = datetime.datetime.now()
-
-        
-        db_session.query(Shop).filter(Shop.id == id).update({
-            'store_name':store_name,
-            'description':description,
+        db_session.query(Shop).filter(Shop.id == shop_id).update({
+            'store_name': store_name,
+            'description': description,
             'active': True,
-         'status': 'Approved'
-         })
+            'status': 'Approved'
+        })
         db_session.commit()
+        flash(error)
         return redirect(url_for("shop.list_shop"))
-        # return render_template("shop/shoplist.html", shops=shops)
 
-
-
-
-
-
-
-
-
-
-
-# class ShopAPI(MethodView):
-
-#     def get(self, id):
-#         r_user_id = session.get('r_user_id')
-#         user = db_session.query(Userdata).get(r_user_id)
-#         if user.is_admin:
-#             if id is None:
-#                 shops = db_session.query(Shop).all()
-#                 return render_template("shop/shoplist.html", shops=shops)
-#             else:
-#                 pass
-        
-
-#     def post(self):
-#         # full_name = request.form['full_name']
-#         # email = request.form['email']
-#         # username = request.form['username']
-#         # password = request.form['password']
-#         # address = request.form['address']
-#         # gender = request.form['gender']
-#         # dob = request.form['dob']
-#         # store_name = request.form['store_name']
-#         # description = request.form['description']
-#         # error = None
-
-#         # if not username:
-#         #     error = 'Username is required.'
-#         # if not password:
-#         #     error = 'password is required.'
-#         # if not full_name:
-#         #     error = 'full name is required.'
-#         # if not email:
-#         #     error = 'email is required.'
-#         # if not address:
-#         #     error = 'address is required.'
-#         # if not gender:
-#         #     error = 'gender is required.'
-#         # if not store_name:
-#         #     error = 'store name is required.'
-#         # if not description:
-#         #     error = 'description is required.'
-
-#         # elif not dob:
-#         #     error = 'dob is required.'
-#         # date = datetime.datetime.now()
-
-#         # if error is None:
-#         #     try:
-#         #         user = Userdata(full_name=full_name, email=email, username=username,
-#         #                         password=generate_password_hash(password),
-#         #                         address=address, gender=gender, dob=dob, active=False, is_admin=False,
-#         #                         is_customer=False, is_shopuser=True, created_at=date,
-#         #                         updated_at=date)
-#         #         db_session.add(user)
-#         #         db_session.commit()
-#         #         shop_object = Shop(user_id=user.id, store_name=store_name, description=description, 
-#         #                         active=False,status="Approved",
-#         #                         created_at=date, updated_at=date)
-#         #         db_session.add(shop_object)
-#         #         db_session.commit()
-
-#         #     except:
-#         #         raise
-#         #         # error = f"User {username} is already registered."
-#         #     else:
-#         #         shops = db_session.query(Shop).all()
-#         #         return render_template("shop/shoplist.html", shops=shops)
-#         pass
-    
-#     def delete(self, id):
-#         r_user_id = session.get('r_user_id')
-#         user = db_session.query(Userdata).get(r_user_id)
-#         if user.is_admin:
-#             shops = db_session.query(Shop).all()
-#             # db_session.query(Shop).filter(Shop.id == id).delete()
-#             # db_session.commit()
-#             # return render_template("shop/shoplist.html", shops=shops)
-#             return "shops"
-
-    
-#     def put(self, user_id):
-#         r_user_id = session.get('r_user_id')
-#         user = db_session.query(Userdata).get(r_user_id)
-#         if user.is_admin:
-#             shops = db_session.query(Shop).all()
-#             db_session.query(Shop).filter(Shop.id == id).update({'active': True, 'status': 'Approved'})
-#             db_session.commit()
-#             return render_template("shop/shoplist.html", shops=shops)
-
-
-# class AdminShop(View):
-#     methods = ['GET','POST']
-
-#     def dispatch_request(self):
-#         if request.method == 'POST':
-#             full_name = request.form['full_name']
-#             email = request.form['email']
-#             username = request.form['username']
-#             password = request.form['password']
-#             address = request.form['address']
-#             gender = request.form['gender']
-#             dob = request.form['dob']
-#             store_name = request.form['store_name']
-#             description = request.form['description']
-#             error = None
-
-#             if not username:
-#                 error = 'Username is required.'
-#             if not password:
-#                 error = 'password is required.'
-#             if not full_name:
-#                 error = 'full name is required.'
-#             if not email:
-#                 error = 'email is required.'
-#             if not address:
-#                 error = 'address is required.'
-#             if not gender:
-#                 error = 'gender is required.'
-#             if not store_name:
-#                 error = 'store name is required.'
-#             if not description:
-#                 error = 'description is required.'
-
-#             elif not dob:
-#                 error = 'dob is required.'
-#             date = datetime.datetime.now()
-
-#             if error is None:
-#                 try:
-#                     user = Userdata(full_name=full_name, email=email, username=username,
-#                                     password=generate_password_hash(password),
-#                                     address=address, gender=gender, dob=dob, active=False, is_admin=False,
-#                                     is_customer=False, is_shopuser=True, created_at=date,
-#                                     updated_at=date)
-#                     db_session.add(user)
-#                     db_session.commit()
-#                     shop_object = Shop(user_id=user.id, store_name=store_name, description=description, 
-#                                     active=True,status="Approved",
-#                                     created_at=date, updated_at=date)
-#                     db_session.add(shop_object)
-#                     db_session.commit()
-
-#                 except:
-#                     raise
-#                     # error = f"User {username} is already registered."
-#                 else:
-#                     shops = db_session.query(Shop).all()
-#                     return render_template("shop/shoplist.html", shops=shops)
-
-#             flash(error)
-
-#         return render_template('shop/adminShop.html')
-
+    return abort(401, "You have to provide either 'url' or 'text', too")
