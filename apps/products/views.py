@@ -58,8 +58,8 @@ def add_category():
                 db_session.add(category)
                 db_session.commit()
 
-            except:
-                raise
+            except Exception as e:
+                raise e
                 # error = f"User {username} is already registered."
             else:
                 return redirect(url_for("auth.all_category"))
@@ -88,9 +88,8 @@ def update_category(cat_id):
             db_session.query(Category).filter(Category.id==cat_id).update(
                 {'category_name':category_data,'updated_at':date})
             db_session.commit()
-        except:
-
-            raise
+        except Exception as e:
+            raise e
                 # error = f"User {username} is already registered."
         else:
             return redirect(url_for("auth.all_category"))
@@ -141,8 +140,8 @@ def create_product():
                 db_session.add(product)
                 db_session.commit()
 
-            except:
-                raise
+            except Exception as e:
+                raise e
                 # error = f"User {username} is already registered."
             else:
                 return redirect(url_for("product.shop_dashboard"))

@@ -213,8 +213,8 @@ def add_user():
                     db_session.add(user)
                     db_session.commit()
 
-                except:
-                    raise
+                except Exception as e:
+                    raise e
                     # error = f"User {username} is already registered."
                 else:
                     return redirect(url_for("auth.user_list"))
@@ -556,9 +556,10 @@ def register():
                 db_session.add(user)
                 db_session.commit()
 
-            except:
-                raise
-                # error = f"User {username} is already registered."
+            except Exception as e:
+                # error = e.args[0][33:]
+                
+                error = f"User {username} is already registered."
             else:
                 otp = randint(1001, 9999)
                 otp_object = OTP(user_id=user.id, otp=otp, created_at=date, updated_at=date)
@@ -631,8 +632,8 @@ def shop_user_register():
                 db_session.add(shop_object)
                 db_session.commit()
 
-            except:
-                raise
+            except Exception as e:
+                raise e
                 # error = f"User {username} is already registered."
             else:
                 otp = randint(1001, 9999)
@@ -847,8 +848,8 @@ def update_profile():
                 db_session.query(Userdata).filter(Userdata.id == r_user_id).update(update_object)
                 db_session.commit()
 
-            except:
-                raise
+            except Exception as e:
+                raise e
                 # error = f"User {username} is already registered."
             else:
                 #     otp = randint(1001,9999)

@@ -77,8 +77,8 @@ def create_shop():
                 db_session.add(shop_object)
                 db_session.commit()
 
-            except:
-                raise
+            except Exception as e:
+                raise e
                 # error = f"User {username} is already registered."
             else:
                 return redirect(url_for("shop.list_shop"))
