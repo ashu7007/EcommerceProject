@@ -31,7 +31,7 @@ class UserTest(unittest.TestCase):
         )
         self.assertIn(b'Incorrect username.', response.data)
 
-    def test_get_register_user_page(self):
+    def test_get_register_page(self):
         tester = app.test_client(self)
         response = tester.get('/auth/register',content_type='html/text')
         self.assertEqual(response.status_code,200)
@@ -49,12 +49,41 @@ class UserTest(unittest.TestCase):
     #     dob ="2022-07-14 17:13:45.138" ), follow_redirects=True)
     #     self.assertEqual(response.status_code,200)
 
+    # def test_register_user_failure(self):
+    #     tester = app.test_client(self)
+    #     response = tester.post('/auth/register',
+    #      data=dict(full_name ="demo",
+    #     email = "test@123.com",
+    #     username = "test@123",
+    #     password ="test@123" ,
+    #     conPassword ="test@123", 
+    #     address = "test",
+    #     gender = "male",
+    #     dob ="2022-07-14 17:13:45.138" ), follow_redirects=True)
+    #     self.assertEqual(response.status_code,200)
+
     def test_get_shop_user_register_page(self):
         tester = app.test_client(self)
         response = tester.get('/auth/shop_user_register',content_type='html/text')
         self.assertEqual(response.status_code,200)
 
-    # def test_register_user(self):
+    # def test_shop_user_register(self):
+    #     tester = app.test_client(self)
+    #     response = tester.post('/auth/shop_user_register',
+    #      data=dict(full_name ="demo",
+    #                 email = "test@123.com",
+    #                 username = "test@123",
+    #                 password ="test@123" ,
+    #                 conpassword ="test@123", 
+    #                 address = "test",
+    #                 gender = "male",
+    #                 dob ="2022-07-14 17:13:45.138",
+    #                 store_name = 'store_name',
+    #                 description = 'description'), follow_redirects=True)
+    #     self.assertEqual(response.status_code,200)
+
+
+    # def test_shop_user_register_failure(self):
     #     tester = app.test_client(self)
     #     response = tester.post('/auth/shop_user_register',
     #      data=dict(full_name ="demo",
@@ -83,6 +112,33 @@ class UserTest(unittest.TestCase):
         response = tester.post('/auth/login',
          data=dict(username='admin', password='admin'), follow_redirects=True)
         response = tester.get('/auth/logout', follow_redirects=True)
+        self.assertEqual(response.status_code,200)
+
+    
+    # def test_all_product(self):
+    #     tester = app.test_client(self)
+    #     response = tester.post('/auth/login',
+    #      data=dict(username='admin', password='admin'), follow_redirects=True)
+    #     response = tester.get('/auth/all_product', follow_redirects=True)
+    #     self.assertEqual(response.status_code,200)
+
+
+    def test_all_category(self):
+        tester = app.test_client(self)
+        response = tester.post('/auth/login',
+         data=dict(username='admin', password='admin'), follow_redirects=True)
+        response = tester.get('/auth/all_category', follow_redirects=True)
+        self.assertEqual(response.status_code,200)
+
+
+
+class ProductTest(unittest.TestCase):
+    
+    def test_all_product(self):
+        tester = app.test_client(self)
+        # response = tester.post('/auth/login',
+        #  data=dict(username='admin', password='admin'), follow_redirects=True)
+        response = tester.get('/auth/all_product', follow_redirects=True)
         self.assertEqual(response.status_code,200)
 
 if __name__ == '__main__':
