@@ -631,7 +631,7 @@ def shop_user_register():
                 db_session.add(user)
                 db_session.commit()
                 shop_object = Shop(user_id=user.id, store_name=store_name, description=description, active=False,
-                                    status="Inprocess"
+                                    status="Inprocess",
                                    created_at=date, updated_at=date)
                 db_session.add(shop_object)
                 db_session.commit()
