@@ -55,7 +55,7 @@ app.register_blueprint(views.prod_bp)
 from apps.products.models import Product
 from apps.users.models import OrderDetail, Orders
 
-@bp.route("/", methods=['POST', 'GET'])
+@app.route("/", methods=['POST', 'GET'])
 def all_product():
     """to show all product"""
     # r_user_id = session.get('r_user_id')
