@@ -142,7 +142,7 @@ class Shop(db.Model):
     store_name = db.Column(db.String(255), nullable=False)
     description = db.Column(db.String(255), nullable=False)
     active = db.Column(db.Boolean, nullable=False)
-    status = db.Column(db.String(10), nullable=False)
+    status = db.Column(db.String(10), nullable=True)
     created_at = db.Column(db.DateTime)
     updated_at = db.Column(db.DateTime)
 
