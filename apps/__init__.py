@@ -55,10 +55,10 @@ app.register_blueprint(views.prod_bp)
 from apps.products.models import Product
 from apps.users.models import OrderDetail, Orders
 
-@app.route("/", methods=['POST', 'GET'])
-def welcome():
-    """Welcome app page"""
-    return "<h1>Welcome to the shopping platform </h1>"
+# @app.route("/", methods=['POST', 'GET'])
+# def welcome():
+#     """Welcome app page"""
+#     return "<h1>Welcome to the shopping platform </h1>"
 
 @app.template_filter('product_name')
 def product_name(id):
