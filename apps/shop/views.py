@@ -7,7 +7,7 @@ from werkzeug.security import generate_password_hash
 
 from apps.users.models import Shop, Userdata
 
-some_engine = create_engine('postgresql+psycopg2://admin:admin@localhost:5432/testShop')
+some_engine = create_engine('postgresql+psycopg2://admin:admin@localhost:5433/testShop')
 Session = sessionmaker(bind=some_engine)
 db_session = Session()
 bp = Blueprint('shop', __name__, url_prefix='/shop')

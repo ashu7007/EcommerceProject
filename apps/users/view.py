@@ -18,7 +18,7 @@ from apps.products.models import Product, Category
 
 
 # some_engine = create_engine('postgresql+psycopg2://admin:admin@localhost/ecommerce')
-some_engine = create_engine('postgresql+psycopg2://admin:admin@localhost:5432/testShop')
+some_engine = create_engine('postgresql+psycopg2://admin:admin@localhost:5433/testShop')
 # db_session = scoped_session(sessionmaker(autocommit=False,
 #                                          autoflush=False,
 #                                          bind=some_engine))

@@ -9,7 +9,7 @@ from apps.products.models import Product,Category
 from apps.users.models import Userdata
 
 # some_engine = create_engine('postgresql+psycopg2://admin:admin@localhost/ecommerce')
-some_engine = create_engine('postgresql+psycopg2://admin:admin@localhost:5432/testShop')
+some_engine = create_engine('postgresql+psycopg2://admin:admin@localhost:5433/testShop')
 Session = sessionmaker(bind=some_engine)
 db_session = Session()
 

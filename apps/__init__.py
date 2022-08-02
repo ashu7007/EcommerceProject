@@ -17,7 +17,7 @@ Bootstrap(app)
 username = 'admin'
 password = 'admin'
 host_url = 'localhost'
-port = '5432'
+port = '5433'
 # db_name = 'ecommerce'
 db_name = 'testShop'
 
