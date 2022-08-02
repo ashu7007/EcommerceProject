@@ -94,7 +94,7 @@ def update_category(cat_id):
         else:
             return redirect(url_for("auth.all_category"))
 
-    flash(error)
+        flash(error)
     return abort(401, "You have to provide either 'url' or 'text', too")
 
 

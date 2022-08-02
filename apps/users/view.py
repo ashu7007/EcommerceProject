@@ -750,7 +750,7 @@ def logout():
 def reset_token(token):
     """to reset token"""
     # if current_user.is_authenticated:
-    #     return redirect(url_for('home'))
+#     return redirect(url_for('home'))
     user_id = Userdata.verify_reset_token(token)
     user = db_session.query(Userdata).get(user_id)
     if user is None:
@@ -781,17 +781,23 @@ def forgot_password():
     """to reset password"""
     if request.method == 'POST':
         username = request.form.get('username')
-        user = db_session.query(Userdata).filter_by(username=username).first()
-        token = user.get_reset_token()
-        msg = Message('Password Reset Request',
-                      sender=os.environ.get("MAIL_USERNAME"),
-                      recipients=[user.email])
-        mail = Mail(current_app)
-        format_url = url_for('auth.reset_token', token=token, _external=True)
-        msg.body = f"To reset your password, visit the following link: {format_url}"
-        mail.send(msg)
-        flash('An email has been sent with instructions to reset your password.', 'info')
-        return redirect(url_for('auth.login'))
+        try:
+            user = db_session.query(Userdata).filter_by(username=username).first()
+            token = user.get_reset_token()
+            msg = Message('Password Reset Request',
+                        sender=os.environ.get("MAIL_USERNAME"),
+                        recipients=[user.email])
+            mail = Mail(current_app)
+            format_url = url_for('auth.reset_token', token=token, _external=True)
+            msg.body = f"To reset your password, visit the following link: {format_url}"
+            mail.send(msg)
+        
+        except Exception as e:
+            raise e
+        else:
+            flash('An email has been sent with instructions to reset your password.', 'info')
+            return redirect(url_for('auth.login'))
+
     return render_template('user/forgetpass.html')
 
 
@@ -825,7 +831,6 @@ def update_profile():
         elif not dob:
             error = 'dob is required.'
         date = datetime.datetime.now()
-        print(error)
         if error is None:
             try:
                 r_user_id = session.get('r_user_id')

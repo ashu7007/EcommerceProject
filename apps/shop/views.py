@@ -28,7 +28,9 @@ def list_shop():
 @bp.route("/create_shop", methods=['POST', 'GET'])
 def create_shop():
     """function to create shop"""
-    if request.method == 'POST':
+    r_user_id = session.get('r_user_id')
+    user = db_session.query(Userdata).get(r_user_id)
+    if request.method == 'POST' and user.is_admin== True:
         full_name = request.form.get('full_name')
         email = request.form.get("email")
         username = request.form.get('username')
@@ -102,22 +104,22 @@ def delete_shop(id):
 
 
 @bp.route("/update_shop/<id>", methods=['POST', 'GET'])
-def update_shop(shop_id):
+def update_shop(id):
     """function to update shop"""
     r_user_id = session.get('r_user_id')
     user = db_session.query(Userdata).get(r_user_id)
 
     if request.method == 'POST' and user.is_admin:
 
-        store_name = request.form['store_name']
-        description = request.form['description']
+        store_name = request.form.get('store_name')
+        description = request.form.get('description')
 
         if not store_name:
             error = 'store name is required.'
         if not description:
             error = 'description is required.'
 
-        db_session.query(Shop).filter(Shop.id == shop_id).update({
+        db_session.query(Shop).filter(Shop.id == id).update({
             'store_name': store_name,
             'description': description,
             'active': True,
