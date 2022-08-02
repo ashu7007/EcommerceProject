@@ -7,7 +7,7 @@ from werkzeug.security import generate_password_hash
 
 from apps.users.models import Shop, Userdata
 
-# some_engine = create_engine('postgresql+psycopg2://admin:admin@localhost:5433/testShop')
+# some_engine = create_engine('postgresql+psycopg2://admin:admin@localhost:5432/testShop')
 some_engine = create_engine('postgresql://sdyfeipbuootgr:0a59a8ac47f990b0233279d18d1623d82120c449bb5e6f19cef3088d62e52427@ec2-44-193-178-122.compute-1.amazonaws.com:5432/da3043ab1s4rca')
 
 Session = sessionmaker(bind=some_engine)

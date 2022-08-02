@@ -19,7 +19,7 @@ from apps.products.models import Product, Category
 
 # some_engine = create_engine('postgresql+psycopg2://admin:admin@localhost/ecommerce')
 
-# some_engine = create_engine('postgresql+psycopg2://admin:admin@localhost:5433/testShop')
+#some_engine = create_engine('postgresql+psycopg2://admin:admin@localhost:5432/testShop')
 some_engine = create_engine('postgresql://sdyfeipbuootgr:0a59a8ac47f990b0233279d18d1623d82120c449bb5e6f19cef3088d62e52427@ec2-44-193-178-122.compute-1.amazonaws.com:5432/da3043ab1s4rca')
 
 # db_session = scoped_session(sessionmaker(autocommit=False,
@@ -560,9 +560,9 @@ def register():
                 db_session.commit()
 
             except Exception as e:
-                # error = e.args[0][33:]
+                error = e.args[0][33:]
                 
-                error = f"User {username} is already registered."
+                #error = f"User {username} is already registered."
             else:
                 otp = randint(1001, 9999)
                 otp_object = OTP(user_id=user.id, otp=otp, created_at=date, updated_at=date)
@@ -663,7 +663,7 @@ def shop_user_register():
                 msg.body = f"To reset your password, visit the following link: {format_url}"
                 mail.send(msg)
 
-                session['r_user_id'] = user.id
+                # session['r_user_id'] = user.id
                 return render_template('user/confirmEmail.html')
                 # return redirect(url_for("auth.login"))
 
