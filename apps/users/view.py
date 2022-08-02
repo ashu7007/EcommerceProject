@@ -20,7 +20,7 @@ from apps.products.models import Product, Category
 # some_engine = create_engine('postgresql+psycopg2://admin:admin@localhost/ecommerce')
 
 # some_engine = create_engine('postgresql+psycopg2://admin:admin@localhost:5433/testShop')
-some_engine = create_engine('postgres://sdyfeipbuootgr:0a59a8ac47f990b0233279d18d1623d82120c449bb5e6f19cef3088d62e52427@ec2-44-193-178-122.compute-1.amazonaws.com:5432/da3043ab1s4rca')
+some_engine = create_engine('postgresql://sdyfeipbuootgr:0a59a8ac47f990b0233279d18d1623d82120c449bb5e6f19cef3088d62e52427@ec2-44-193-178-122.compute-1.amazonaws.com:5432/da3043ab1s4rca')
 
 # db_session = scoped_session(sessionmaker(autocommit=False,
 #                                          autoflush=False,
