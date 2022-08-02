@@ -1,0 +1,128 @@
+{% extends 'base.html' %}
+
+
+{% block content %}
+
+<div class="card mx-auto container-fluid" style="width:100%;">
+    <div class="row">
+        <div class="col">
+            <h1 class=" mx-4">{% block title %}Shop Applications{% endblock %}</h1>
+        </div>
+        <div class="col d-flex justify-content-end mx-4 mt-4">
+            <a href="{{ url_for('shop.list_shop') }}" >
+                <input class="btn btn-secondary btn-sm mb-4" type=submit value="Dashboard" >
+            </a>
+        </div>
+    </div>
+    
+    
+    
+  <div class="card-body">
+
+    <table id="table_id" class=" display table ">
+        <thead>
+          <tr>
+            <th scope="col">#</th>
+            <th scope="col">User id</th>
+            <th scope="col">Verified user</th>
+            <th scope="col">Store name</th>
+            <th scope="col">Description</th>
+            <th scope="col">Active</th>
+            <th scope="col">Status</th>
+            <th scope="col">Action</th>
+            
+          </tr>
+        </thead>
+        <tbody>
+            
+        {%for sh in shops%}
+          <tr>
+            <th scope="row">{{sh.id}}</th>
+            <td>{{sh.user_id}}</td>
+            <td>True</td>
+            <td>{{sh.store_name}}</td>
+            <td>{{sh.description}}</td>
+            <td>{{sh.active}}</td>
+            <td>{{sh.status}}</td>
+            <td>
+                <div class="row">
+                    <div class="col mb-2">
+                        <form class="f" action="{{ url_for('auth.approval_shop',id =sh.id) }}">
+                            <!-- <input hidden name="status" value="True" > -->
+                            <input class="btn btn-secondary btn-sm" type=submit value="Approve" style="width:100%">
+                            </form>
+                    </div>
+                    <div class="col">
+                        <button type="button" style="width:100%" class="btn btn-danger btn-sm" data-toggle="modal" data-target="#{{sh.id}}" data-whatever="@mdo">Reject</button>
+                        <!-- <input class="btn btn-danger btn-sm mx-1" type=submit value="Reject" style="width:100%"> -->
+                        </div>
+                </div>
+               
+                </td>
+          </tr>
+
+
+          <!-- Modal -->
+  <div class="modal fade" id="{{sh.id}}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">{{sh.store_name}}</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body ">
+          <form action="{{ url_for('auth.reject_shop',id =sh.id) }}" method="post">
+            <div class="form-group">
+              <label for="message-text" class="col-form-label">Rejection reason:</label>
+              <textarea class="form-control" name="message" id="message-text"></textarea>
+            
+            </div>
+            <div class="my-3">
+            <button type="button " class="btn btn-secondary btn-sm" data-dismiss="modal">Close</button>
+            <input class="btn btn-danger btn-sm" type=submit value="Reject and Send" >
+            </div>
+        
+          </form>
+        </div>
+        <div class="modal-footer">
+          
+      </div>
+    </div>
+  </div>
+
+        {% endfor %}
+        
+        </tbody>
+      </table>
+    
+  
+  <!-- <form method="post">
+    <div class="mb-3">
+      <label class="form-label" for="username">Username</label>
+      <input class="form-control" name="username" id="username" required>
+    </div>
+    <div class="mb-3">
+      <label class="form-label" for="password">Password</label>
+      <input class="form-control" type="password" name="password" id="password" required>
+    </div>
+    <div class="row">
+    <div class="col ">
+      <input class="btn btn-primary" type="submit" value="Log In">
+    </div>
+    <div class="col ">
+      <span class="d-flex justify-content-end mt-3">Forgot <a href="{{ url_for('auth.forgot_password') }}"> password?</a></span>
+    </div>
+    </div>
+    
+  </form> -->
+  </div>
+</div>
+<script>
+    $('#myModal').on('shown.bs.modal', function () {
+  $('#myInput').trigger('focus')
+})
+
+</script>
+{% endblock %}

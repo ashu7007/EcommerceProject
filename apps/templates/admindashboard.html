@@ -1,0 +1,197 @@
+{% extends 'base.html' %}
+{% block header %}
+  <h1 class="d-flex justify-content-start mx-4">{% block title %}Dashboard{% endblock %}</h1>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+
+  <div class="row">
+    <div class="row">
+        <div class="col mb-2">
+
+        <form action="{{ url_for('auth.admin_dashboard') }}" method="POST">
+          <label class="form-label" for="shop_products">Shop Products</label>
+          <select class="form-select"  name="shop_products" id="shop_products" aria-label="Default select example">
+            
+            {% for shop in shops %}
+                <option value="{{shop.id}}" >{{shop.store_name}}</option>
+            {% endfor %}
+          </select>
+          <input type="submit"  onclick="myFun()" class="btn btn-secondary btn-sm my-2" value="get shop product">
+        </form>
+          </div>
+
+          <div class="col mb-2">
+          
+            <form action="{{ url_for('auth.admin_dashboard') }}" method="POST">
+              <label class="form-label" for="shop_orders">Shop Orders</label>
+              <select class="form-select"  name="shop_orders" id="shop_orders" aria-label="Default select example">
+                
+                {% for shop in shops %}
+                    <option value="{{shop.id}}" >{{shop.store_name}}</option>
+                {% endfor %}
+              </select>
+              <input type="submit" class="btn btn-secondary btn-sm my-2" value="get shop orders">
+            </form>
+              </div>
+
+              <div class="col mb-2">
+          
+                <form action="{{ url_for('auth.admin_dashboard') }}" method="POST">
+                  <label class="form-label" for="customer_orders">Customer Orders</label>
+                  <select class="form-select"  name="customer_orders" id="customer_orders" aria-label="Default select example">
+                    
+                    {% for cus in customer %}
+                        <option value="{{cus.id}}" >{{cus.username}}</option>
+                    {% endfor %}
+                  </select>
+                  <input type="submit" class="btn btn-secondary btn-sm my-2" value="get customer order">
+                </form>
+                  </div>
+
+    </div>
+      
+    <div class="col">
+      {% if shop_orders%} 
+      <h3>Shop Orders</h3>
+      <h5 id="label">Shop Products</h5>
+      <table id="table_id" class=" display table ">
+        <thead>
+            <tr>
+                <th scope="col">#id</th>
+                <th scope="col">product</th>
+                <th scope="col">brand</th>
+                <th scope="col">quantity</th>
+                <th scope="col">amount</th>
+                <th scope="col">customer</th>
+                <!-- <th scope="col">email id</th> -->
+                <th scope="col">address</th>
+                <th scope="col">date</th>
+                
+                
+                
+              </tr>
+        </thead>
+        <tbody>
+            
+            {%for sh in shop_orders%}
+            <tr >
+              <th scope="row">#</th>
+              <td>{{sh.product_id|product_name}}</td>
+              <td>{{sh.product_id|product_brand}}</td>
+              <td>{{sh.quantity}}</td>
+              <td>{{sh.price}}</td>
+                
+              <td>{{sh.order_id|customer_username}}</td>
+              
+              <td>{{sh.order_id|customer_address}}</td>
+              
+                
+              <td>{{sh.created_at.strftime('%Y-%m-%d %I:%M%p')}}</td>
+              
+            </tr>
+  
+          {% endfor %}
+          
+          </tbody>
+        </table>
+        {% endif%}
+
+
+
+    {% if products%} 
+    <h3>Shop Products</h3>
+    <h5 id="label">Shop Products</h5>
+    <table id="table_id" class=" display table">
+        <thead>
+            <tr>
+                <th scope="col">#</th>
+                <th scope="col">product name</th>
+                <th scope="col">brand</th>
+                <th scope="col">price</th>
+                <th scope="col">stock</th>
+                <th scope="col">sold</th>
+              </tr>
+        </thead>
+        <tbody>
+            
+            {%for sh in products%}
+            <tr >
+              <th scope="row">{{sh.id}}</th>
+              <td>{{sh.product_name}}</td>
+              <td>{{sh.brand}}</td>
+              <td>{{sh.price}}</td>
+              <td>{{sh.stock_quantity}}</td>
+              <td>{{sh.sold_quantity}}</td>
+              
+            </tr>
+  
+          {% endfor %}
+          
+          </tbody>
+        </table>
+        {% endif%}
+
+        {% if customer_order%} 
+        <h3>Customer Orders</h3>
+        <h5 id="label">Shop Products</h5>
+
+        <table id="table_id" class=" display table ">
+          <thead>
+              <tr>
+                  <th scope="col">#id</th>
+                  
+                  <th scope="col">payment status</th>
+                  <th scope="col">amount</th>
+                  <th scope="col">date</th>
+                  <th scope="col">process status</th>
+                  <th scope="col">Action</th>
+                  
+                </tr>
+          </thead>
+          <tbody>
+              
+              {%for sh in customer_order%}
+              <tr >
+                <th scope="row">{{sh.id}}</th>
+                
+                <td class="text-success">{{sh.payment.name}}</td>
+                <td >{{sh.id|total_price}}</td>
+                <td>{{sh.created_at.strftime('%Y-%m-%d %I:%M%p')}}</td>
+                <td>{{sh.status.name}}</td>
+               
+                
+                <td>
+                    <div class="row">
+                      <div class="col mb-2">
+                        <a href="{{ url_for('auth.order_detail', order_id=sh.id) }}" class="col btn btn-warning btn-sm mb-2" style="width:100%;">
+                          View Detail
+                        </a>
+                    </div>
+                        
+                    </div>
+                   
+                    </td>
+              </tr>
+    
+            {% endfor %}
+            
+            </tbody>
+          </table>
+          {% endif%}
+    </div>
+    
+  </div>
+</div>
+
+
+
+
+
+<script>
+ function myFun() {
+  document.getElementById("label").innerHTML = "you data";
+}
+  </script>
+{% endblock %}

@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+
+
+{% block content %}
+<div class="row">
+    <h2 >Order History</h2>
+
+</div>
+
+<table id="table_id" class=" display table ">
+        <thead>
+            <tr>
+                <th scope="col">#id</th>
+                
+                <th scope="col">payment status</th>
+                <th scope="col">amount</th>
+                <th scope="col">date</th>
+                <th scope="col">process status</th>
+                <th scope="col">Action</th>
+                
+              </tr>
+        </thead>
+        <tbody>
+            
+            {%for sh in orders%}
+            <tr >
+              <th scope="row">{{sh.id}}</th>
+              
+              <td class="text-success">{{sh.payment.name}}</td>
+              <td >{{sh.id|total_price}}</td>
+              <td>{{sh.created_at.strftime('%Y-%m-%d %I:%M%p')}}</td>
+              <td>{{sh.status.name}}</td>
+             
+              
+              <td>
+                  <div class="row">
+                    <div class="col mb-2">
+                      <a href="{{ url_for('auth.order_detail', order_id=sh.id) }}" class="col btn btn-warning btn-sm mb-2" style="width:100%;">
+                        View Detail
+                      </a>
+                  </div>
+                      
+                      <!-- <div class="col">
+                        <a href="{{ url_for('auth.add_cart', prod_id=sh.id,page='wish') }}" class="btn btn-secondary btn-sm" style="width:100%;">
+                            Update
+                        </a>
+                          </div> -->
+                  </div>
+                 
+                  </td>
+            </tr>
+  
+            
+            <!-- Modal -->
+
+          
+  
+          {% endfor %}
+          
+          </tbody>
+        </table>
+    
+
+
+       
+    
+  
+  
+  
+<script>
+    $('#myModal').on('shown.bs.modal', function () {
+  $('#myInput').trigger('focus')
+})
+
+</script>
+{% endblock %}

@@ -1,9 +1,166 @@
 {% extends 'base.html' %}
 {% block header %}
-  <h1>{% block title %}Dashboard{% endblock %}</h1>
+
 {% endblock %}
 
 {% block content %}
-<h2>Developing Shop</h2>
+<div class="container-fluid">
 
+  <nav class="navbar navbar-light bg-light">
+    <div class="container-fluid">
+      <form class="d-flex" action="{{url_for('auth.product_list')}}">
+        <input class="form-control me-2" type="search" name ="search" placeholder="Search" aria-label="Search">
+        <button class="btn btn-outline-success" type="submit">Search</button>
+      </form>
+      <div class="row my-2">
+      <div class="dropdown col">
+        <button class="btn btn-secondary btn-sm dropdown-toggle" type="button" id="dropdownMenuButton23" data-bs-toggle="dropdown" aria-expanded="false">
+          Filter
+        </button>
+        <!-- form filter -->
+        <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+        <div  class="card mx-auto" style="width: 25rem;">
+    
+          <h4 class=" m-2">Filter</h4>
+          
+        <div class="card-body">
+        
+        <form method="post">
+          <div class="">
+            <label class="form-label" for="username">Price</label>
+      
+       <div class="row mx-2">
+            <div class="col form-check">
+        <input class="form-check-input" type="radio" name="price" id="low" value='1-250'checked>
+        <label class="form-check-label" for="low">
+          1 - 250 $
+        </label>
+      </div>
+      <div class="col form-check">
+        <input class="form-check-input" type="radio" name="price" id="high" value='250-1000'>
+        <label class="form-check-label" for="high">
+          250 - 1000 $
+        </label>
+      </div>
+          </div>
+          <div class="">
+            <label class="form-label" for="password">category</label>
+            <div class="row mx-2">
+              <select class="form-select"  name="category" id="category" aria-label="Default select example">
+                
+                {% for cat in category %}
+                <option value="{{cat.id}}" >{{cat.category_name}}</option>
+            {% endfor %}
+              </select>
+            
+            </div>
+           
+          </div>
+        
+        
+        
+        
+        
+        <div class="">
+            <label class="form-label" for="brand">Brand</label>
+            <div class="row mx-2">
+              <select class="form-select"  name="brand" id="data" aria-label="Default select example">
+                  
+                {% for bn in brand %}
+                    <option value="{{bn.brand}}" >{{bn.brand}}</option>
+                {% endfor %}
+              </select>
+             
+            </div>
+          </div>
+          <div class="m-2">
+            <input class="btn btn-secondary btn-sm" style="width: 100%;" type=submit value="Filter" >
+          </div>
+          
+        </form>
+        </div>
+      </div>
+      
+
+
+        </ul>
+      </div>
+
+
+      <div class="col">
+        Sort by:
+      </div>
+      <div class="dropdown col">
+        <button class="btn btn-secondary btn-sm dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+          Price
+        </button>
+        <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+          <li><a class="dropdown-item" href="{{(url_for('auth.product_list',sort='price',price='low'))}}">low to high</a></li>
+          <li><a class="dropdown-item" href="{{(url_for('auth.product_list',sort='price',price='high'))}}">high to low</a></li>
+        </ul>
+      </div>
+
+      <div class="dropdown col">
+        <button class="btn btn-secondary btn-sm dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+          rating
+        </button>
+        <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+          <li><a class="dropdown-item" href="{{(url_for('auth.product_list',sort='price',price='low'))}}">low to high</a></li>
+          <li><a class="dropdown-item" href="{{(url_for('auth.product_list',sort='price',price='high'))}}">high to low</a></li>
+        </ul>
+      </div>
+
+    </div>
+
+
+    </div>
+  </nav>
+<div class="row mx-auto">
+  
+  {% for prod in products.items %}
+  <div class="col-4 my-3">
+  <div class="card" >
+    <img src="{{url_for('static', filename='image/product.jpg')}}" class="card-img-top" alt="...">
+    <div class="card-body">
+      <h5 class="card-title">{{prod.product_name}}</h5>
+      <div class="row">
+        <div class="col"><p class="card-text">{{prod.price}}$</p></div>
+        <div class="col">
+          <span class="d-flex justify-content-end fa fa-star checkedstar">5/5</span>
+        </div>
+
+      </div>
+      
+        <div class="col">      
+          <a href="{{ url_for('auth.add_wishlist', prod_id=prod.id) }}" class="col btn btn-warning btn-sm mb-2" style="width:100%;">Add to Wishlist</a>
+        </div>
+    <div class="row">
+        <div class="col">
+          <a href="{{ url_for('auth.add_cart', prod_id=prod.id,page='index') }}" class="col btn btn-danger btn-sm mb-2" style="width:100%;"><span>Add to Cart</span></a>
+        </div>
+        <!-- <div class="col">
+          <a href="#" class="col btn btn-danger btn-sm" style="width:100%;">Buy now</a>
+
+        </div> -->
+    </div>
+    </div>
+  </div>
+</div>
+  {% endfor %}
+ 
+</div>
+<div class="mx-auto">
+{% for page_num in products.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=2) %}
+{% if page_num %}
+  {% if products.page == page_num %}
+    <a class="btn btn-info mb-4" href="{{ url_for('auth.product_list', page=page_num) }}">{{ page_num }}</a>
+  {% else %}
+    <a class="btn btn-outline-info mb-4" href="{{ url_for('auth.product_list', page=page_num) }}">{{ page_num }}</a>
+  {% endif %}
+{% else %}
+  ...
+{% endif %}
+{% endfor %}
+</div>
+</div>
 {% endblock %}

@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+
+
+{% block content %}
+<div class="card mx-auto" style="width: 25rem;">
+    
+    <h1 class=" mx-4">{% block title %}Forgot Password{% endblock %}</h1>
+    
+  <div class="card-body">
+  
+  <form method="post">
+    <div class="mb-3">
+      <small class="text-primary"> please enter the email id to get reset link</small>
+      <br>
+      <label class="form-label " for="username">Username</label>
+      
+      <input class="form-control" name="username" id="username" required>
+    </div>
+    <input class="btn btn-primary" type="submit" value="Send reset link">
+  </form>
+  </div>
+</div>
+{% endblock %}

@@ -1,15 +1,32 @@
 {% extends 'base.html' %}
 
-{% block header %}
-  <h1>{% block title %}Log In{% endblock %}</h1>
-{% endblock %}
 
 {% block content %}
+<div class="card mx-auto" style="width: 25rem;">
+    
+    <h1 class=" mx-4">{% block title %}Log In{% endblock %}</h1>
+    
+  <div class="card-body">
+  
   <form method="post">
-    <label for="username">Username</label>
-    <input name="username" id="username" required>
-    <label for="password">Password</label>
-    <input type="password" name="password" id="password" required>
-    <input type="submit" value="Log In">
+    <div class="mb-3">
+      <label class="form-label" for="username">Username</label>
+      <input class="form-control" name="username" id="username" required>
+    </div>
+    <div class="mb-3">
+      <label class="form-label" for="password">Password</label>
+      <input class="form-control" type="password" name="password" id="password" required>
+    </div>
+    <div class="row">
+    <div class="col ">
+      <input class="btn btn-secondary" style="width:100%;" type="submit" value="Log In">
+    </div>
+    <div class="col ">
+      <span class="d-flex justify-content-end mt-3">Forgot <a href="{{ url_for('auth.forgot_password') }}"> password?</a></span>
+    </div>
+    </div>
+    
   </form>
+  </div>
+</div>
 {% endblock %}

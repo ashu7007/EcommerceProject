@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+
+
+{% block content %}
+
+
+<table id="table_id" class=" display table container">
+        <thead>
+            <tr>
+                <th scope="col">#</th>
+                <th scope="col">product name</th>
+                <th scope="col">brand</th>
+                <th scope="col">price</th>
+                <th scope="col">Action</th>
+                
+              </tr>
+        </thead>
+        <tbody>
+            
+            {%for sh in products%}
+            <tr >
+              <th scope="row">{{sh.id}}</th>
+              <td>{{sh.product_name}}</td>
+              <td>{{sh.brand}}</td>
+              <td>{{sh.price}}</td>
+              
+              <td>
+                  <div class="row">
+                    <div class="col mb-2">
+                      <a href="{{ url_for('auth.add_cart', prod_id=sh.id,page='wish') }}" class="col btn btn-warning btn-sm mb-2" style="width:100%;">
+                          
+                          Add to cart
+                      </a>
+                  </div>
+                      
+                      <div class="col">
+                          <button type="button" class="btn btn-danger btn-sm" style="width:100%", data-toggle="modal" data-target="#{{sh.id}}delete" data-whatever="@mdo">Remove</button>
+                          <!-- <input class="btn btn-danger btn-sm mx-1" type=submit value="Reject" style="width:100%"> -->
+                          </div>
+                  </div>
+                 
+                  </td>
+            </tr>
+  
+            
+            <!-- Modal -->
+
+          <div class="modal fade" id="{{sh.id}}delete" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+              <div class="modal-dialog" role="document">
+                      <div class="modal-content">
+                              <div class="modal-header">
+                                  <h5 class="modal-title" id="exampleModalLabel">Confirmation</h5>
+                                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                      <span aria-hidden="true">&times;</span>
+                                  </button>
+                              </div>
+                              <div class="modal-body " >
+                                      <div class="form-group">
+                                      <label for="message-text" class="col-form-label">Are you sure want to remove {{sh.product_name}}</label>
+                                      </div>
+                                      <div class="my-3" id = "{{sh.id}}">
+                                      <button type="button " class="btn btn-secondary btn-sm" data-dismiss="modal">Close</button>
+                                      <a href="{{ url_for('auth.delete_wishlist',prod_id =sh.id) }}">
+                                          <button type="button " class="btn btn-danger btn-sm" id="del">Remove</button>
+                                      </a>
+                                      </div>
+                              </div>
+                  
+                      </div>
+              </div>
+          </div>
+  
+          {% endfor %}
+          
+          </tbody>
+        </table>
+    
+
+
+       
+    
+  
+  
+  
+<script>
+    $('#myModal').on('shown.bs.modal', function () {
+  $('#myInput').trigger('focus')
+})
+
+</script>
+{% endblock %}

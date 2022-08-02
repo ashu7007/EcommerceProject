@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+
+{% block content %}
+<div class="card mx-auto" style="width: 25rem;">
+    
+  <h1 class=" mx-4">Email confirmation</h1>
+  
+<div class="card-body">
+  <form action="{{ url_for('auth.verify') }}" method="post">
+    <div class="mb-3">
+      <label class="form-label my-3" for="otp">Please enter the otp,which is sent in you email</label>
+      <input class="form-control" name="otp" id="otp" required>
+      <input class="btn btn-primary my-3"type="submit" value="Verify">
+  </div>
+  </form>
+  </div>
+  </div>
+
+{% endblock %}

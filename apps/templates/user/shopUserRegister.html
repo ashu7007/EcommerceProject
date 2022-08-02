@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+
+
+
+{% block content %}
+<div class="card mx-auto" style="width: 40rem;">
+  <h1 class=" d-flex justify-content-center mx-4">Shop User Signup</h1>
+  <div class="card-body">
+    <form  method="post">
+      <div class="row">
+        <div class="col mb-3">
+          <label class="form-label" for="full_name">Full Name</label>
+          <input class="form-control" name="full_name" id="full_name" required>
+        </div>
+        <div class="col mb-3">
+          <label class="form-label" for="email">Email</label>
+          <input class="form-control" name="email" id="email" required>
+        </div>
+       </div>
+
+       <div class="row">
+      <div class="col mb-3">
+      <label class="form-label" for="username">Username</label>
+      <input class="form-control" name="username" id="username" required>
+      </div>
+      <div class="col mb-3">
+      <label class="form-label" for="password">Password</label>
+      <input class="form-control" type="password" name="password" id="password" required>
+      </div>
+    </div>
+
+      <div class="row">
+        <div class="col mb-3">
+          <label class="form-label" for="gender">Gender</label>
+          <select class="form-select"  name="gender" id="gender" required aria-label="Default select example">
+          
+            <option value="male">Male</option>
+            <option value="female">Female</option>
+            
+          </select>
+          </div>
+          <div class="col mb-3">
+          <label class="form-label" for="dob">Date of birth</label>
+          <input class="form-control" type="date" name="dob" id="dob" required>
+          </div>
+    </div>
+    
+    <div class="row">
+      <div class="col mb-3">
+      <label class="form-label" for="store_name">Store Name</label>
+      <input class="form-control" name="store_name" id="store_name" required>
+      </div>
+      <div class="col mb-3">
+      <label class="form-label" for="description">Description</label>
+      <input class="form-control" name="description" id="description" required>
+      </div>
+    </div>
+
+      <div class="row"> 
+      <div class="col mb-3">
+      <label class="form-label" for="address">Address</label>
+      <input class="form-control" name="address" id="address" required>
+      </div>
+    </div>
+      
+    <div class="row">
+    <div class="col ">
+      <input class="btn btn-primary" type="submit" value="Register">
+    </div>
+    
+    </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

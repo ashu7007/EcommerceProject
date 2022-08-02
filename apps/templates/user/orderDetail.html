@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+
+
+{% block content %}
+
+<div class="row">
+    <h2 class="col-3 ">Order Detail</h2>
+    <h2 class="col-4 text-success" id="total"></h2>
+  <div class="col d-flex justify-content-end">
+      <a href="{{ url_for('auth.cancel_order',order_id=order_id) }}" class= "btn btn-danger btn-sm my-2"><span>Cancel Order</span></a>
+        
+        </div>
+</div>
+
+<table id="table_id" class=" display table ">
+        <thead>
+            <tr>
+                <th scope="col">#id</th>
+                <th scope="col">product</th>
+                <th scope="col">brand</th>
+                <th scope="col">quantity</th>
+                <th scope="col">amount</th>
+                
+                
+              </tr>
+        </thead>
+        <tbody>
+            
+            {%for sh in order_detail%}
+            <tr >
+              <th scope="row">#</th>
+              <td>{{sh.product_id|product_name}}</td>
+              <td>{{sh.product_id|product_brand}}</td>
+              <td>{{sh.quantity}}</td>
+              <td>{{sh.price}}</td>
+              
+            </tr>
+  
+          {% endfor %}
+          
+          </tbody>
+        </table>
+    
+
+
+       
+    
+  
+  
+  
+<script>
+    $('#myModal').on('shown.bs.modal', function () {
+  $('#myInput').trigger('focus')
+})
+
+
+$(document).ready( function updateSubTotal() {
+  var table = document.getElementById("table_id");
+  let subTotal = Array.from(table.rows).slice(1).reduce((total, row) => {
+    return total + parseFloat(row.cells[4].innerHTML);
+  }, 0);
+  document.getElementById("total").innerHTML = "Bill Amt $ " + subTotal.toFixed(2);
+} );
+</script>
+{% endblock %}

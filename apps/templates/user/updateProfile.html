@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+
+
+
+{% block content %}
+<div class="card mx-auto">
+  <h1 class=" mx-4">User Profile</h1>
+  <div class="card-body">
+    <form  method="post">
+      <div class="mb-3">
+      <label class="form-label" for="full_name">Full Name</label>
+      <input class="form-control" name="full_name" id="full_name" value="{{user.full_name}}" required>
+      </div>
+      <div class="mb-3">
+      <label class="form-label" for="email">Email</label>
+      <input class="form-control" name="email" id="email"  disabled required>
+      </div>
+      <div class="mb-3">
+      <label class="form-label" for="username">Username</label>
+      <input class="form-control" name="username" id="username" disabled required>
+      </div>
+      <div class="mb-3">
+      <label class="form-label" for="password">Password</label>
+      <input class="form-control" type="password" name="password" id="password" disabled >
+      </div>
+      <!-- <div class="mb-3">
+        <label class="form-label" for="password">Confim Password</label>
+        <input class="form-control" type="password" name="password" id="password" required>
+        </div> -->
+      <div class="mb-3">
+        <label class="form-label" for="gender">Gender</label>
+        <select class="form-select"  name="gender" id="gender" required aria-label="Default select example">
+        
+          <option value="male">Male</option>
+          <option value="female">Female</option>
+          
+        </select>
+      </div>
+      <div class="mb-3">
+      <label class="form-label" for="dob">Date of birth</label>
+      <input class="form-control" type="date" name="dob" id="dob"  placeholder="{{user.dob}}" required>
+      <!-- <input class="form-control"  name="dob" id="dob"   required> -->
+      </div>
+      <div class="mb-3">
+      <label class="form-label" for="address">Address</label>
+      <input class="form-control" name="address" id="address" value="{{user.address}}" required>
+      </div>
+     
+
+
+      <input class="btn btn-primary" type="submit" value="Update">
+    </form>
+  </div>
+</div>
+{% endblock %}
