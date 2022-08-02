@@ -664,7 +664,7 @@ def shop_user_register():
                 msg.body = f"To reset your password, visit the following link: {format_url}"
                 mail.send(msg)
 
-                # session['r_user_id'] = user.id
+                session['r_user_id'] = user.id
                 return render_template('user/confirmEmail.html')
                 # return redirect(url_for("auth.login"))
 
