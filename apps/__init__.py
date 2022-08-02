@@ -51,13 +51,11 @@ from apps.products import views
 app.register_blueprint(views.prod_bp)
 
 
-
 #custom filter
 from apps.products.models import Product
 from apps.users.models import OrderDetail, Orders
 
-
-@app.route("/", methods=['POST', 'GET'])
+@bp.route("/", methods=['POST', 'GET'])
 def all_product():
     """to show all product"""
     # r_user_id = session.get('r_user_id')
