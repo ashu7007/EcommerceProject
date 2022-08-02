@@ -1,5 +1,5 @@
 import os
-from flask import Flask
+from flask import Flask, render_template
 from flask_bootstrap import Bootstrap
 # from dbConfig import db
 from flask_sqlalchemy import SQLAlchemy
@@ -56,12 +56,9 @@ from apps.products.models import Product
 from apps.users.models import OrderDetail, Orders
 
 @app.route("/", methods=['POST', 'GET'])
-def all_product():
-    """to show all product"""
-    # r_user_id = session.get('r_user_id')
-    # user = db_session.query(Userdata).get(r_user_id)
-    products = Product.query.all()
-    return render_template("product/allProduct.html", products=products)
+def welcome():
+    """Welcome app page"""
+    return "<h1>Welcome to the shopping platform </h1>"
 
 @app.template_filter('product_name')
 def product_name(id):
