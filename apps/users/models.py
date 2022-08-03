@@ -1,3 +1,4 @@
+"""Models related to user operations"""
 import enum
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 from flask import current_app
@@ -11,6 +12,7 @@ db = db_sql
 
 
 class Userdata(db.Model):
+    """Model for users"""
     __tablename__ = 'userdata'
     id = db.Column(db.Integer, primary_key=True)
     full_name = db.Column(db.String(255), nullable=False)

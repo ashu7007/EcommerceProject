@@ -11,16 +11,17 @@ from sqlalchemy import create_engine, desc
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.sql import func
 
-from apps.users.models import Userdata, OTP, Shop, ShopRejection, Wishlist, Cart, Orders, OrderDetail, Status, Payment
+from apps.users.models import Userdata, OTP, Shop, ShopRejection,\
+    Wishlist, Cart, Orders, OrderDetail, Status, Payment
 from apps.products.models import Product, Category
 
 # from dbConfig import db
 
 
-# some_engine = create_engine('postgresql+psycopg2://admin:admin@localhost/ecommerce')
+some_engine = create_engine(os.environ.get('DATABASE_URL'))
 
-#some_engine = create_engine('postgresql+psycopg2://admin:admin@localhost:5432/testShop')
-some_engine = create_engine('postgresql://sdyfeipbuootgr:0a59a8ac47f990b0233279d18d1623d82120c449bb5e6f19cef3088d62e52427@ec2-44-193-178-122.compute-1.amazonaws.com:5432/da3043ab1s4rca')
+# some_engine = create_engine('postgresql+psycopg2://admin:admin@localhost:5432/testShop')
+#some_engine = create_engine('postgresql://sdyfeipbuootgr:0a59a8ac47f990b0233279d18d1623d82120c449bb5e6f19cef3088d62e52427@ec2-44-193-178-122.compute-1.amazonaws.com:5432/da3043ab1s4rca')
 
 # db_session = scoped_session(sessionmaker(autocommit=False,
 #                                          autoflush=False,
@@ -32,7 +33,31 @@ db_session = Session()
 bp = Blueprint('auth', __name__, url_prefix='/auth')
 
 
+@bp.before_app_request
+def load_logged_in_user():
+    """ logged user"""
+    user_id = session.get('r_user_id')
+
+    if user_id is None:
+        g.user = None
+    else:
+        g.user = db_session.query(Userdata).filter(Userdata.id == user_id).first()
+
+
+def login_required(view):
+    """ function to check logged-in user"""
+    @functools.wraps(view)
+    def wrapped_view(**kwargs):
+        if g.user is None:
+            return redirect(url_for('auth.login'))
+
+        return view(**kwargs)
+
+    return wrapped_view
+
+
 @bp.route("/shop_orders")
+@login_required
 def order_for_shopuser():
     """order received by shop"""
     r_user_id = session.get('r_user_id')
@@ -40,11 +65,13 @@ def order_for_shopuser():
     if user.is_shopuser:
         shop_user = Userdata.query.filter(Userdata.id == user.id).first()
         ids = [product.id for product in shop_user.product]
-        orders = OrderDetail.query.filter(OrderDetail.product_id.in_(ids)).all()
-        return render_template("user/shopOrders.html", orders=orders)
+        order = OrderDetail.query.filter(OrderDetail.product_id.in_(ids)).all()
+        return render_template("user/shopOrders.html", orders=order)
+    return abort(401, "You have to provide either 'url' or 'text', too")
 
 
 @bp.route("/admin_dashboard/", methods=['POST', 'GET'])
+@login_required
 def admin_dashboard():
     """to show admin dashboard"""
     r_user_id = session.get('r_user_id')
@@ -68,7 +95,8 @@ def admin_dashboard():
                                    , customer=customer, shop_orders=shop_orders)
 
         if request.form.get('customer_orders'):
-            customer_order = Orders.query.filter(Orders.user_id == request.form.get('customer_orders')).all()
+            customer_order = Orders.query.filter(
+                Orders.user_id == request.form.get('customer_orders')).all()
             return render_template("admindashboard.html", shops=shops, brand=brand,
                                    customer=customer, customer_order=customer_order, )
 
@@ -76,6 +104,7 @@ def admin_dashboard():
 
 
 @bp.route("/all_product/", methods=['POST', 'GET'])
+@login_required
 def all_product():
     """to show all product"""
     # r_user_id = session.get('r_user_id')
@@ -84,6 +113,7 @@ def all_product():
     return render_template("product/allProduct.html", products=products)
 
 @bp.route("/all_category/", methods=['POST', 'GET'])
+@login_required
 def all_category():
     """to show all product"""
     # r_user_id = session.get('r_user_id')
@@ -92,6 +122,7 @@ def all_category():
     return render_template("product/allcategory.html", category=category)
 
 @bp.route("/all_orders/", methods=['POST', 'GET'])
+@login_required
 def all_orders():
     """to show all orders"""
 
@@ -102,6 +133,7 @@ def all_orders():
 
 
 @bp.route("/admin_sale/", methods=['POST', 'GET'])
+@login_required
 def admin_sale():
     """to show all sale to admin user"""
     r_user_id = session.get('r_user_id')
@@ -136,6 +168,7 @@ def admin_sale():
 
 
 @bp.route("/shop_sale/", methods=['POST', 'GET'])
+@login_required
 def shop_sale():
     """to show all sale to shop user"""
     r_user_id = session.get('r_user_id')
@@ -149,9 +182,11 @@ def shop_sale():
         data = request.form.get('data')
 
         if data.isdigit():
-            product = Product.query.filter(Product.category_id == int(data), Product.user_id == user.id).all()
+            product = Product.query.filter(Product.category_id == int(data),
+                                           Product.user_id == user.id).all()
         else:
-            product = Product.query.filter(Product.brand == data, Product.user_id == user.id).all()
+            product = Product.query.filter(Product.brand == data,
+                                           Product.user_id == user.id).all()
         for prod in product:
             total_qnt = total_qnt + prod.stock_quantity
             total_sold = total_sold + prod.sold_quantity
@@ -161,6 +196,7 @@ def shop_sale():
 
 
 @bp.route("/user_list")
+@login_required
 def user_list():
     """to show all users admin user"""
 
@@ -174,6 +210,7 @@ def user_list():
 
 
 @bp.route("/add_user", methods=['GET', 'POST'])
+@login_required
 def add_user():
     """to add users"""
     r_user_id = session.get('r_user_id')
@@ -225,6 +262,7 @@ def add_user():
 
 
 @bp.route("/shop_approval_list")
+@login_required
 def shop_approval_list():
     """to show all shop approval shop to admin user"""
 
@@ -251,12 +289,15 @@ def product_list():
     products = Product.query.paginate(page=page, per_page=6)
 
     if request.method == 'POST':
-        min, max = request.form.get('price').split('-')
+        min_value, max_value = request.form.get('price').split('-')
         cat = request.form.get('category')
         brd = request.form.get('brand')
 
-        products = Product.query.filter(Product.price > int(min), Product.price < int(max),
-                                        Product.category_id == cat, Product.brand == brd).paginate(page=page, per_page=6)
+        products = Product.query.filter(Product.price > int(min_value),
+                                        Product.price < int(max_value),
+                                        Product.category_id == cat,
+                                        Product.brand == brd
+                                        ).paginate(page=page, per_page=6)
         return render_template("index.html", products=products, user=search,
                                category=category, brand=brand)
     if search:
@@ -273,6 +314,7 @@ def product_list():
 
 
 @bp.route("/wishlist", methods=['POST', 'GET'])
+@login_required
 def wishlist():
     """to show  wishlist user"""
     r_user_id = session.get('r_user_id')
@@ -287,6 +329,7 @@ def wishlist():
 
 
 @bp.route("/place_order")
+@login_required
 def place_order():
     """function to place order"""
     r_user_id = session.get('r_user_id')
@@ -315,6 +358,7 @@ def place_order():
 
 
 @bp.route("/order_detail/<order_id>")
+@login_required
 def order_detail(order_id):
     """to show order detail of user"""
 
@@ -327,6 +371,7 @@ def order_detail(order_id):
 
 
 @bp.route("/cancel_order/<order_id>")
+@login_required
 def cancel_order(order_id):
     """to cancel user order"""
     r_user_id = session.get('r_user_id')
@@ -338,6 +383,7 @@ def cancel_order(order_id):
 
 
 @bp.route("/orders")
+@login_required
 def orders():
     """to show users orders"""
     r_user_id = session.get('r_user_id')
@@ -349,6 +395,7 @@ def orders():
 
 
 @bp.route("/add_wishlist/<prod_id>", methods=['POST', 'GET'])
+@login_required
 def add_wishlist(prod_id):
     """to add product on wishlist"""
     r_user_id = session.get('r_user_id')
@@ -372,6 +419,7 @@ def add_wishlist(prod_id):
 
 
 @bp.route("/delete_wishlist/<prod_id>", methods=['POST', 'GET'])
+@login_required
 def delete_wishlist(prod_id):
     """to delete product from wishlish"""
     r_user_id = session.get('r_user_id')
@@ -387,6 +435,7 @@ def delete_wishlist(prod_id):
 
 
 @bp.route("/cart", methods=['POST', 'GET'])
+@login_required
 def cart():
     """to show cart of user"""
     r_user_id = session.get('r_user_id')
@@ -403,18 +452,19 @@ def cart():
 
 
 @bp.route("/add_cart/<prod_id>/<page>", methods=['POST', 'GET'])
+@login_required
 def add_cart(prod_id, page):
     """to add product in cart"""
     r_user_id = session.get('r_user_id')
     user = db_session.query(Userdata).get(r_user_id)
     date = datetime.datetime.now()
 
-    wl = db_session.query(Wishlist).filter(Wishlist.user_id == r_user_id).first()
+    w_list = db_session.query(Wishlist).filter(Wishlist.user_id == r_user_id).first()
 
-    if wl and int(prod_id) in wl.product_id:
-        wl_id = wl.product_id
+    if w_list and int(prod_id) in w_list.product_id:
+        wl_id = w_list.product_id
         wl_id.remove(int(prod_id))
-        db_session.query(Wishlist).filter(Wishlist.id == wl.id).update({'product_id': list(set(wl_id))})
+        db_session.query(Wishlist).filter(Wishlist.id == w_list.id).update({'product_id': list(set(wl_id))})
         db_session.commit()
 
     if user.is_customer and prod_id:
@@ -444,6 +494,7 @@ def add_cart(prod_id, page):
 
 
 @bp.route("/delete_cart/<prod_id>", methods=['POST', 'GET'])
+@login_required
 def delete_cart(prod_id):
     """to delete product from cart"""
     r_user_id = session.get('r_user_id')
@@ -472,6 +523,7 @@ def delete_cart(prod_id):
 
 
 @bp.route("/approval_shop/<id>")
+@login_required
 def approval_shop(id):
     """function to approve shop"""
     r_user_id = session.get('r_user_id')
@@ -486,6 +538,7 @@ def approval_shop(id):
 
 
 @bp.route("/reject_shop/<id>", methods=('GET', 'POST'))
+@login_required
 def reject_shop(id):
     """to reject shop application"""
     if request.method == "POST":
@@ -505,7 +558,7 @@ def reject_shop(id):
             db_session.commit()
             user = db_session.query(Userdata).filter(Userdata.id == shop.user_id).first()
             msg = Message(
-                f'Rejection aknowlegment',
+                'Rejection aknowlegment',
                 sender='avaish@deqode.com',
                 recipients=[user.email]
             )
@@ -731,6 +784,7 @@ def verify():
 
 
 @bp.route('/logout')
+@login_required
 def logout():
     """to logout user"""
     session.clear()
@@ -806,6 +860,7 @@ def forgot_password():
 
 
 @bp.route('/update_profile', methods=['GET', 'POST'])
+@login_required
 def update_profile():
     """update user profile"""
     if request.method == 'POST':
@@ -880,26 +935,3 @@ def update_profile():
     r_user_id = session.get('r_user_id')
     user = db_session.query(Userdata).get(r_user_id)
     return render_template('user/updateProfile.html', user=user)
-
-
-@bp.before_app_request
-def load_logged_in_user():
-    """ logged user"""
-    user_id = session.get('r_user_id')
-
-    if user_id is None:
-        g.user = None
-    else:
-        g.user = db_session.query(Userdata).filter(Userdata.id == user_id).first()
-
-
-def login_required(view):
-    """ function to check logged-in user"""
-    @functools.wraps(view)
-    def wrapped_view(**kwargs):
-        if g.user is None:
-            return redirect(url_for('auth.login'))
-
-        return view(**kwargs)
-
-    return wrapped_view

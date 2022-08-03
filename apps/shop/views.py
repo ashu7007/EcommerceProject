@@ -1,4 +1,5 @@
 """module related to shop operations"""
+import os
 import datetime
 from flask import (Blueprint, flash, redirect, render_template, request, session, url_for,abort)
 from sqlalchemy import create_engine
@@ -6,9 +7,12 @@ from sqlalchemy.orm import sessionmaker
 from werkzeug.security import generate_password_hash
 
 from apps.users.models import Shop, Userdata
+from apps.users.view import login_required
+
+some_engine = create_engine(os.environ.get('DATABASE_URL'))
 
 # some_engine = create_engine('postgresql+psycopg2://admin:admin@localhost:5432/testShop')
-some_engine = create_engine('postgresql://sdyfeipbuootgr:0a59a8ac47f990b0233279d18d1623d82120c449bb5e6f19cef3088d62e52427@ec2-44-193-178-122.compute-1.amazonaws.com:5432/da3043ab1s4rca')
+#some_engine = create_engine('postgresql://sdyfeipbuootgr:0a59a8ac47f990b0233279d18d1623d82120c449bb5e6f19cef3088d62e52427@ec2-44-193-178-122.compute-1.amazonaws.com:5432/da3043ab1s4rca')
 
 Session = sessionmaker(bind=some_engine)
 db_session = Session()
@@ -16,6 +20,7 @@ bp = Blueprint('shop', __name__, url_prefix='/shop')
 
 
 @bp.route("/list_shop", methods=['POST', 'GET'])
+@login_required
 def list_shop():
     """function to list shop"""
     r_user_id = session.get('r_user_id')
@@ -28,6 +33,7 @@ def list_shop():
 
 
 @bp.route("/create_shop", methods=['POST', 'GET'])
+@login_required
 def create_shop():
     """function to create shop"""
     r_user_id = session.get('r_user_id')
@@ -82,8 +88,8 @@ def create_shop():
                 db_session.commit()
 
             except Exception as e:
-                raise e
-                # error = f"User {username} is already registered."
+                # raise e
+                error = f"User {username} is already registered."
             else:
                 return redirect(url_for("shop.list_shop"))
                 # shops = db_session.query(Shop).all()
@@ -93,6 +99,7 @@ def create_shop():
 
 
 @bp.route("/delete_shop/<id>", methods=['POST', 'GET'])
+@login_required
 def delete_shop(id):
     """function to delete shop"""
     r_user_id = session.get('r_user_id')
@@ -106,6 +113,7 @@ def delete_shop(id):
 
 
 @bp.route("/update_shop/<id>", methods=['POST', 'GET'])
+@login_required
 def update_shop(id):
     """function to update shop"""
     r_user_id = session.get('r_user_id')
@@ -128,7 +136,6 @@ def update_shop(id):
             'status': 'Approved'
         })
         db_session.commit()
-        flash(error)
         return redirect(url_for("shop.list_shop"))
 
     return abort(401, "You have to provide either 'url' or 'text', too")

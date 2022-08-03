@@ -23,8 +23,8 @@ db_name = 'testShop'
 
 # DB_URL = 'postgresql+psycopg2://{user}:{pw}@{url}/{db_name}'.format(
 #     user=username, pw=password, url=host_url,  db_name=db_name)
-DB_URL = 'postgresql://sdyfeipbuootgr:0a59a8ac47f990b0233279d18d1623d82120c449bb5e6f19cef3088d62e52427@ec2-44-193-178-122.compute-1.amazonaws.com:5432/da3043ab1s4rca'
-app.config['SQLALCHEMY_DATABASE_URI'] = DB_URL
+# DB_URL = 'postgresql://sdyfeipbuootgr:0a59a8ac47f990b0233279d18d1623d82120c449bb5e6f19cef3088d62e52427@ec2-44-193-178-122.compute-1.amazonaws.com:5432/da3043ab1s4rca'
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL')
 # app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////tmp/test.db'
 db_sql=SQLAlchemy(app)
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False  # silence the deprecation warning
