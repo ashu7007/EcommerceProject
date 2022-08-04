@@ -12,7 +12,6 @@ from apps.users.view import login_required
 some_engine = create_engine(os.environ.get('DATABASE_URL'))
 
 # some_engine = create_engine('postgresql+psycopg2://admin:admin@localhost:5432/testShop')
-#some_engine = create_engine('postgresql://sdyfeipbuootgr:0a59a8ac47f990b0233279d18d1623d82120c449bb5e6f19cef3088d62e52427@ec2-44-193-178-122.compute-1.amazonaws.com:5432/da3043ab1s4rca')
 
 Session = sessionmaker(bind=some_engine)
 db_session = Session()
@@ -87,7 +86,7 @@ def create_shop():
                 db_session.add(shop_object)
                 db_session.commit()
 
-            except Exception as e:
+            except Exception:
                 # raise e
                 error = f"User {username} is already registered."
             else:
@@ -124,10 +123,10 @@ def update_shop(id):
         store_name = request.form.get('store_name')
         description = request.form.get('description')
 
-        if not store_name:
-            error = 'store name is required.'
-        if not description:
-            error = 'description is required.'
+        # if not store_name:
+        #     error = 'store name is required.'
+        # if not description:
+        #     error = 'description is required.'
 
         db_session.query(Shop).filter(Shop.id == id).update({
             'store_name': store_name,
