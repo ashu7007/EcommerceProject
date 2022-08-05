@@ -9,7 +9,7 @@ from sqlalchemy.orm import sessionmaker
 
 from apps.products.models import Product, Category
 from apps.users.models import Userdata
-from apps.users.view import login_required
+from apps.users.models import login_required
 
 some_engine = create_engine(os.environ.get('DATABASE_URL'))
 # some_engine = create_engine('postgresql+psycopg2://admin:admin@localhost:5432/testShop')
@@ -18,7 +18,7 @@ some_engine = create_engine(os.environ.get('DATABASE_URL'))
 Session = sessionmaker(bind=some_engine)
 db_session = Session()
 
-prod_bp = Blueprint('product', __name__, url_prefix='/product')
+# prod_bp = Blueprint('product', __name__, url_prefix='/product')
 
 
 class ShopDashboard(View):

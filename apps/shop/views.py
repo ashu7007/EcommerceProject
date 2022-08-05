@@ -8,7 +8,8 @@ from sqlalchemy.orm import sessionmaker
 from werkzeug.security import generate_password_hash
 
 from apps.users.models import Shop, Userdata
-from apps.users.view import login_required
+from apps.users.models import login_required
+
 
 some_engine = create_engine(os.environ.get('DATABASE_URL'))
 
@@ -16,7 +17,7 @@ some_engine = create_engine(os.environ.get('DATABASE_URL'))
 
 Session = sessionmaker(bind=some_engine)
 db_session = Session()
-bp = Blueprint('shop', __name__, url_prefix='/shop')
+# bp = Blueprint('shop', __name__, url_prefix='/shop')
 
 
 class ListShop(View):
@@ -106,7 +107,7 @@ class AdminDeleteShop(View):
     """AdminDeleteShop Operation class"""
     methods = ["GET","POST"]
     decorators = [login_required,]
-    def dispatch_request(self):
+    def dispatch_request(self,id):
         """function to delete shop"""
         r_user_id = session.get('r_user_id')
         user = db_session.query(Userdata).get(r_user_id)

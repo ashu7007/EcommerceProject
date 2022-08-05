@@ -166,3 +166,35 @@ class ShopRejection(db.Model):
 
     def __repr__(self):
         return f"'{self.id}','{self.user_id}'"
+
+from apps import app
+from sqlalchemy import create_engine, desc
+from sqlalchemy.orm import sessionmaker
+import functools
+import os
+from flask import Flask, render_template, session, redirect, g, url_for
+some_engine = create_engine(os.environ.get('DATABASE_URL'))
+Session = sessionmaker(bind=some_engine)
+db_session = Session()
+@app.before_request
+def load_logged_in_user():
+    """ logged user"""
+    user_id = session.get('r_user_id')
+
+    if user_id is None:
+        g.user = None
+    else:
+        g.user = db_session.query(Userdata).filter(Userdata.id == user_id).first()
+
+
+def login_required(view):
+    """ function to check logged-in user"""
+    @functools.wraps(view)
+    def wrapped_view(**kwargs):
+        if g.user is None:
+            return redirect(url_for('auth.login'))
+
+        return view(**kwargs)
+
+    return wrapped_view
+

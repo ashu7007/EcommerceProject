@@ -1,7 +1,6 @@
 """Operation related to user"""
 import os
 import datetime
-import functools
 from random import randint
 from flask_mail import Mail, Message
 from flask import (Blueprint, flash, g, redirect, render_template, request,
@@ -15,7 +14,7 @@ from sqlalchemy.sql import func
 from apps.users.models import Userdata, OTP, Shop, ShopRejection,\
     Wishlist, Cart, Orders, OrderDetail, Status, Payment
 from apps.products.models import Product, Category
-
+from .models import login_required
 # from dbConfig import db
 
 
@@ -25,30 +24,9 @@ Session = sessionmaker(bind=some_engine)
 
 db_session = Session()
 
-bp = Blueprint('auth', __name__, url_prefix='/auth')
+# bp = Blueprint('auth', __name__, url_prefix='/auth')
 
 
-@bp.before_app_request
-def load_logged_in_user():
-    """ logged user"""
-    user_id = session.get('r_user_id')
-
-    if user_id is None:
-        g.user = None
-    else:
-        g.user = db_session.query(Userdata).filter(Userdata.id == user_id).first()
-
-
-def login_required(view):
-    """ function to check logged-in user"""
-    @functools.wraps(view)
-    def wrapped_view(**kwargs):
-        if g.user is None:
-            return redirect(url_for('auth.login'))
-
-        return view(**kwargs)
-
-    return wrapped_view
 
 
 class OrderForShopuser(View):
@@ -708,7 +686,6 @@ class RegisterShopUser(View):
     methods = ["GET", "POST"]
 
     def dispatch_request(self):
-        print("classs========================")
         """to register shop user"""
         if request.method == 'POST':
             full_name = request.form['full_name']

@@ -1,9 +1,8 @@
 import os
-from flask import Flask, render_template
+from flask import Flask, render_template, session, redirect, g, url_for
 from flask_bootstrap import Bootstrap
 # from dbConfig import db
 from flask_sqlalchemy import SQLAlchemy
-
 
 
 app = Flask(__name__)
@@ -41,7 +40,7 @@ db_sql.create_all()
 # app.config.from_mapping(SECRET_KEY='dev',)
 
 from apps.users import view
-app.register_blueprint(view.bp)
+# app.register_blueprint(view.bp)
 app.add_url_rule('/auth/login', view_func=view.Login.as_view(name='auth.login'))
 app.add_url_rule('/auth/verify', view_func=view.VerifyOTP.as_view(name='auth.verify'))
 app.add_url_rule('/auth/register', view_func=view.Register.as_view(name='auth.register'))

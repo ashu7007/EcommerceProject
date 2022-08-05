@@ -10,7 +10,39 @@
 
 # date = datetime.datetime.now()
 
+import unittest
+from myapp import app, db
+from user.models import User
 
+class UserTest(unittest.TestCase):
+
+    def setUp(self):
+        self.db_uri = 'sqlite:///' + os.path.join(basedir, 'test.db')
+        app.config['TESTING'] = True
+        app.config['WTF_CSRF_ENABLED'] = False
+        app.config['SQLALCHEMY_DATABASE_URI'] = self.db_uri
+        self.app = app.test_client()
+        db.create_all()
+
+    def tearDown(self):
+        db.session.remove()
+        db.drop_all()
+
+    def test_models(self):
+        #Create a customer user
+        user = User("John Doe", "jdoe@jdoe.com", "jdoe", "password", is_consultant=False)
+        db.session.add(user)
+        db.session.commit()
+
+        #Create 2 consultant users
+        user1 = User("Jane Doe", "janedoe@gg.com", "janedoe", "password", is_consultant=True)
+        db.session.add(user1)
+        user2 = User("Nikola Tesla", "nikola@tesla.com", "nikola", "password", is_consultant=True)
+        db.session.add(user2)
+        db.session.commit()
+
+        #Check that all users exist
+        assert len(User.query.all()) is 3
 
 # # app = Flask(__name__)
 
