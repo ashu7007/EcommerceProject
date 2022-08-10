@@ -14,7 +14,7 @@ from sqlalchemy.sql import func
 from apps.users.models import Userdata, OTP, Shop, ShopRejection,\
     Wishlist, Cart, Orders, OrderDetail, Status, Payment
 from apps.products.models import Product, Category
-from .models import login_required
+from .models import login_required,admin_only,shopuser_only,admin_shopuser_only,customer_only
 # from dbConfig import db
 
 
@@ -31,24 +31,24 @@ db_session = Session()
 
 class OrderForShopuser(View):
     """Order For Shopuser Operation class"""
-    methods = ["GET","POST"]
-    decorators = [login_required,]
+    methods = ["GET",]
+    decorators = [login_required,shopuser_only]
+    
     def dispatch_request(self):
         """order received by shop"""
         r_user_id = session.get('r_user_id')
         user = db_session.query(Userdata).get(r_user_id)
-        if user.is_shopuser:
-            shop_user = Userdata.query.filter(Userdata.id == user.id).first()
-            ids = [product.id for product in shop_user.product]
-            order = OrderDetail.query.filter(OrderDetail.product_id.in_(ids)).all()
-            return render_template("user/shopOrders.html", orders=order)
-        return abort(401, "You are not authozired, plz login first")
+        # if user.is_shopuser:
+        shop_user = Userdata.query.filter(Userdata.id == user.id).first()
+        ids = [product.id for product in shop_user.product]
+        order = OrderDetail.query.filter(OrderDetail.product_id.in_(ids)).all()
+        return render_template("user/shopOrders.html", orders=order)
 
 
 class AdminDashboard(View):
     """Admin Dashboard Operation class"""
     methods = ["GET","POST"]
-    decorators = [login_required,]
+    decorators = [login_required,admin_only]
     def dispatch_request(self):
         """to show admin dashboard"""
         r_user_id = session.get('r_user_id')
@@ -86,8 +86,6 @@ class AllProduct(View):
     decorators = [login_required,]
     def dispatch_request(self):
         """to show all product"""
-        # r_user_id = session.get('r_user_id')
-        # user = db_session.query(Userdata).get(r_user_id)
         products = Product.query.all()
         return render_template("product/allProduct.html", products=products)
 
@@ -107,7 +105,7 @@ class AllCategory(View):
 class AllOrders(View):
     """AllOrders Operation class"""
     methods = ["GET","POST"]
-    decorators = [login_required,]
+    decorators = [login_required,admin_only]
     def dispatch_request(self):
         """to show all orders"""
 
@@ -120,7 +118,7 @@ class AllOrders(View):
 class AdminSale(View):
     """AdminSale Operation class"""
     methods = ["GET","POST"]
-    decorators = [login_required,]
+    decorators = [login_required,admin_only]
     def dispatch_request(self):
         """to show all sale to admin user"""
         r_user_id = session.get('r_user_id')
@@ -157,7 +155,7 @@ class AdminSale(View):
 class ShopSale(View):
     """ShopSale Operation class"""
     methods = ["GET","POST"]
-    decorators = [login_required,]
+    decorators = [login_required,shopuser_only]
     def dispatch_request(self):
         """to show all sale to shop user"""
         r_user_id = session.get('r_user_id')
@@ -187,7 +185,7 @@ class ShopSale(View):
 class UserList(View):
     """UserList Operation class"""
     methods = ["GET",]
-    decorators = [login_required,]
+    decorators = [login_required,admin_only]
     def dispatch_request(self):
         """to show all users admin user"""
 
@@ -198,78 +196,74 @@ class UserList(View):
                 (Userdata.is_customer == True) |
                 (Userdata.is_shopuser == True)).all()
             return render_template("user/userlist.html", users=users)
-        return abort(401, "You are not authozired")
 
 
 class AddUser(View):
     """AddUser Operation class"""
     methods = ["GET","POST"]
-    decorators = [login_required,]
+    decorators = [login_required,admin_only]
     def dispatch_request(self):
         """to add users"""
         r_user_id = session.get('r_user_id')
         user = db_session.query(Userdata).get(r_user_id)
-        if user.is_admin:
-            if request.method == 'POST':
-                full_name = request.form['full_name']
-                email = request.form['email']
-                username = request.form['username']
-                password = request.form['password']
-                address = request.form['address']
-                gender = request.form['gender']
-                dob = request.form['dob']
-                error = None
 
-                if not username:
-                    error = 'Username is required.'
-                elif not password:
-                    error = 'password is required.'
-                elif not full_name:
-                    error = 'full name is required.'
-                elif not email:
-                    error = 'email is required.'
-                elif not address:
-                    error = 'address is required.'
-                elif not gender:
-                    error = 'gender is required.'
-                elif not dob:
-                    error = 'dob is required.'
-                date = datetime.datetime.now()
+        if user.is_admin and request.method == 'POST':
+            full_name = request.form['full_name']
+            email = request.form['email']
+            username = request.form['username']
+            password = request.form['password']
+            address = request.form['address']
+            gender = request.form['gender']
+            dob = request.form['dob']
+            error = None
 
-                if error is None:
-                    try:
-                        user = Userdata(full_name=full_name, email=email, username=username,
-                                        password=generate_password_hash(password),
-                                        address=address, gender=gender, dob=dob, active=True, is_admin=False,
-                                        is_customer=True,
-                                        is_shopuser=False, created_at=date,
-                                        updated_at=date)
-                        db_session.add(user)
-                        db_session.commit()
+            if not username:
+                error = 'Username is required.'
+            elif not password:
+                error = 'password is required.'
+            elif not full_name:
+                error = 'full name is required.'
+            elif not email:
+                error = 'email is required.'
+            elif not address:
+                error = 'address is required.'
+            elif not gender:
+                error = 'gender is required.'
+            elif not dob:
+                error = 'dob is required.'
+            date = datetime.datetime.now()
 
-                    except Exception as e:
-                        raise e
-                        # error = f"User {username} is already registered."
-                    else:
-                        return redirect(url_for("auth.user_list"))
+            if error is None:
+                try:
+                    user = Userdata(full_name=full_name, email=email, username=username,
+                                    password=generate_password_hash(password),
+                                    address=address, gender=gender, dob=dob, active=True, is_admin=False,
+                                    is_customer=True,
+                                    is_shopuser=False, created_at=date,
+                                    updated_at=date)
+                    db_session.add(user)
+                    db_session.commit()
+
+                except Exception:
+                    error = f"User {username} is already registered."
+                else:
+                    return redirect(url_for("auth.user_list"))
+            flash(error)
             return render_template('user/addUser.html')
-        return abort(401, "You are not authozired")
+        return render_template('user/addUser.html')
 
 
 class ShopApprovalList(View):
     """ShopApprovalList Operation class"""
     methods = ["GET",]
-    decorators = [login_required,]
+    decorators = [login_required,admin_only]
     def dispatch_request(self):
         """to show all shop approval shop to admin user"""
 
         r_user_id = session.get('r_user_id')
         user = db_session.query(Userdata).get(r_user_id)
-        if user.is_admin:
-            shops = db_session.query(Shop).all()
-
-            return render_template("user/shoplist.html", shops=shops)
-        return redirect(url_for("auth.login"))
+        shops = db_session.query(Shop).all()
+        return render_template("user/shoplist.html", shops=shops)
 
 
 class ProductList(View):
@@ -316,7 +310,7 @@ class ProductList(View):
 class WishlistView(View):
     """WishlistView Operation class"""
     methods = ["GET","POST"]
-    decorators = [login_required,]
+    decorators = [login_required,customer_only]
     def dispatch_request(self):
         """to show  wishlist user"""
         r_user_id = session.get('r_user_id')
@@ -328,12 +322,12 @@ class WishlistView(View):
                 return render_template("user/wishlish.html", products=products)
             else:
                 return render_template("user/wishlish.html")
-        return abort(401, "You are not authozired")
+        
 
 class PlaceOrder(View):
     """PlaceOrder Operation class"""
     methods = ["GET","POST"]
-    decorators = [login_required,]
+    decorators = [login_required,customer_only]
 
     def dispatch_request(self):
         """function to place order"""
@@ -359,7 +353,6 @@ class PlaceOrder(View):
             db_session.query(Cart).filter(Cart.id == cart.id).update({'items': {}})
             db_session.commit()
             return redirect(url_for("auth.product_list"))
-        return redirect(url_for("auth.login"))
 
 
 class OrderDetailView(View):
@@ -374,13 +367,12 @@ class OrderDetailView(View):
         if user:
             order_detail = db_session.query(OrderDetail).filter(OrderDetail.order_id == order_id).all()
             return render_template("user/orderDetail.html", order_detail=order_detail, order_id=order_id)
-        return abort(401, "You are not authozired, plz login first")
 
 
 class CancelOrder(View):
     """CancelOrder Operation class"""
     methods = ["GET","POST"]
-    decorators = [login_required,]
+    decorators = [login_required,customer_only]
 
     def dispatch_request(self,order_id):
         """to cancel user order"""
@@ -390,13 +382,12 @@ class CancelOrder(View):
             db_session.query(Orders).filter(Orders.id == order_id).update({'status': Status.StatusCancelled})
             db_session.commit()
             return redirect(url_for("auth.orders"))
-        return abort(401, "You are not authozired")
 
 
 class OrdersView(View):
     """OrderView Operation class"""
     methods = ["GET","POST"]
-    decorators = [login_required,]
+    decorators = [login_required,customer_only]
 
     def dispatch_request(self):
         """to show users orders"""
@@ -405,13 +396,12 @@ class OrdersView(View):
         if user.is_customer:
             orders = Orders.query.filter(Orders.user_id==user.id).all()
             return render_template('user/orderlist.html', orders=orders)
-        return redirect(url_for("auth.login"))
 
 
 class AddWishlist(View):
     """AddWishlist Operation class"""
     methods = ["GET","POST"]
-    decorators = [login_required,]
+    decorators = [login_required,customer_only]
 
     def dispatch_request(self,prod_id):
         """to add product on wishlist"""
@@ -432,13 +422,12 @@ class AddWishlist(View):
                 db_session.query(Wishlist).filter(Wishlist.id == wish_list.id).update({'product_id': list(set(wl_id))})
                 db_session.commit()
             return redirect(url_for("auth.product_list"))
-        return redirect(url_for("auth.login"))
 
 
 class DeleteWishlist(View):
     """DeleteCart Operation class"""
     methods = ["GET","POST"]
-    decorators = [login_required,]
+    decorators = [login_required,customer_only]
 
     def dispatch_request(self,prod_id):
         """to delete product from wishlish"""
@@ -452,13 +441,12 @@ class DeleteWishlist(View):
             db_session.query(Wishlist).filter(Wishlist.id == wish_list.id).update({'product_id': list(set(wl_id))})
             db_session.commit()
             return redirect(url_for("auth.wishlist"))
-        return abort(401, "You are not authozired")
 
 
 class CartView(View):
     """Show Cart Operation class"""
     methods = ["GET","POST"]
-    decorators = [login_required,]
+    decorators = [login_required,customer_only]
 
     def dispatch_request(self):
         """to show cart of user"""
@@ -473,12 +461,12 @@ class CartView(View):
             if cart:
                 return render_template("user/cart.html", cart=cart)
             return render_template("user/cart.html")
-        return abort(401, "You are not authozired")
+
 
 class AddCart(View):
     """AddCart Operation class"""
     methods = ["GET","POST"]
-    decorators = [login_required,]
+    decorators = [login_required,customer_only]
 
     def dispatch_request(self,prod_id,page):
         """to add product in cart"""
@@ -523,7 +511,7 @@ class AddCart(View):
 class DeleteCart(View):
     """DeleteCart Operation class"""
     methods = ["GET","POST"]
-    decorators = [login_required,]
+    decorators = [login_required,customer_only]
 
     def dispatch_request(self,prod_id):
         """to delete product from cart"""
@@ -549,13 +537,12 @@ class DeleteCart(View):
             db_session.query(Cart).filter(Cart.id == cart.id).update({'items': items})
             db_session.commit()
             return redirect(url_for("auth.cart"))
-        return redirect(url_for("auth.login"))
 
 
 class ApprovalShop(View):
     """ApprovalShop Operation class"""
     methods = ["GET",]
-    decorators = [login_required,]
+    decorators = [login_required,admin_only]
 
     def dispatch_request(self,id):
 
@@ -568,13 +555,13 @@ class ApprovalShop(View):
             db_session.commit()
 
             return render_template("user/shoplist.html", shops=shops)
-        return redirect(url_for("auth.login"))
+        
 
 
 class RejectShop(View):
     """Reject shop Operation class"""
     methods = ["GET","POST"]
-    decorators = [login_required,]
+    decorators = [login_required,admin_only]
 
     def dispatch_request(self,id):
         """to reject shop application"""
@@ -825,14 +812,16 @@ class VerifyOTP(View):
             r_user_id = session.get('r_user_id')
             otp = int(request.form['otp'])
             otp_db = db_session.query(OTP).filter(OTP.user_id == r_user_id).order_by(desc(OTP.created_at)).first()
-            if otp == otp_db.otp:
-                db_session.query(Userdata).filter(Userdata.id == r_user_id).update({'active': True})
-                # db_session.query(OTP).filter(OTP.user_id == r_user_id).order_by(desc(OTP.created_at)).first().delete()
-                db_session.query(OTP).filter(OTP.id == otp_db.id).delete()
-                db_session.commit()
-                session.clear()
-                return redirect(url_for("auth.login"))
-            return "incorrect Otp"
+            if otp_db:
+                if otp == otp_db.otp:
+                    db_session.query(Userdata).filter(Userdata.id == r_user_id).update({'active': True})
+                    # db_session.query(OTP).filter(OTP.user_id == r_user_id).order_by(desc(OTP.created_at)).first().delete()
+                    db_session.query(OTP).filter(OTP.id == otp_db.id).delete()
+                    db_session.commit()
+                    session.clear()
+                    return redirect(url_for("auth.login"))
+                return abort(400, "incorrect otp")
+            return abort(400, "no otp generated")
         return abort(401, "You are not authozired, plz login first")
 
 # @bp.route('/logout')
@@ -919,12 +908,14 @@ class ForgotPassword(View):
                 msg.body = f"To reset your password, visit the following link: {format_url}"
                 mail.send(msg)
             
-            except Exception as e:
-                raise e
+            except Exception:
+                error = "no username found"
             else:
                 flash('An email has been sent with instructions to reset your password.', 'info')
                 return redirect(url_for('auth.login'))
-
+            if error:
+                flash(error)
+                return redirect(url_for('auth.login'))
         return render_template('user/forgetpass.html')
 
 
@@ -940,6 +931,8 @@ class UpdateProfile(View):
     def dispatch_request(self):
 
         """update user profile"""
+        r_user_id = session.get('r_user_id')
+        user = db_session.query(Userdata).get(r_user_id)
         if request.method == 'POST':
             full_name = request.form.get('full_name')
             # email = request.form.get('email')
@@ -988,9 +981,9 @@ class UpdateProfile(View):
                     db_session.query(Userdata).filter(Userdata.id == r_user_id).update(update_object)
                     db_session.commit()
 
-                except Exception as e:
+                except Exception:
                     db_session.rollback()
-                    error = e
+                    error = "data should be in correct format"
                 else:
                     #     otp = randint(1001,9999)
                     #     otp_object= OTP(user_id=user.id,otp=otp,created_at=date,updated_at=date)
@@ -1007,7 +1000,6 @@ class UpdateProfile(View):
                     #     session['r_user_id'] = user.id
                     #     return render_template('user/confirmEmail.html')
                     return redirect(url_for("auth.product_list"))
-
-        r_user_id = session.get('r_user_id')
-        user = db_session.query(Userdata).get(r_user_id)
+                flash(error)
+                return render_template('user/updateProfile.html', user=user)
         return render_template('user/updateProfile.html', user=user)

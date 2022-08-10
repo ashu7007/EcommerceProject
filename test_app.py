@@ -37,7 +37,7 @@ class UserTest(unittest.TestCase):
         """to test login func"""
         tester = app.test_client(self)
         response = tester.post('/auth/login',
-                               data=dict(username='jay123', password='demo'), follow_redirects=True)
+                               data=dict(username='user', password='demo'), follow_redirects=True)
         self.assertIn(b'jay123', response.data)
         # self.assertTrue(g.user.is_shopuser == True)
         self.assertEqual(response.status_code, 200)
@@ -46,7 +46,7 @@ class UserTest(unittest.TestCase):
         """to test login func"""
         tester = app.test_client(self)
         response = tester.post('/auth/login',
-                               data=dict(username='shop', password='demo'), follow_redirects=True)
+                               data=dict(username='shopuser', password='demo'), follow_redirects=True)
         self.assertIn(b'shop', response.data)
         # self.assertTrue(g.user.is_shopuser == True)
         self.assertEqual(response.status_code, 200)

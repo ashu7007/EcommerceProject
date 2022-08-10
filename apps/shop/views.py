@@ -8,7 +8,7 @@ from sqlalchemy.orm import sessionmaker
 from werkzeug.security import generate_password_hash
 
 from apps.users.models import Shop, Userdata
-from apps.users.models import login_required
+from apps.users.models import login_required,admin_only,shopuser_only,admin_shopuser_only,customer_only
 
 
 some_engine = create_engine(os.environ.get('DATABASE_URL'))
@@ -23,7 +23,7 @@ db_session = Session()
 class ListShop(View):
     """ListShop Operation class"""
     methods = ["GET","POST"]
-    decorators = [login_required,]
+    decorators = [login_required,admin_only]
     def dispatch_request(self):
         """function to list shop"""
         r_user_id = session.get('r_user_id')
@@ -32,13 +32,11 @@ class ListShop(View):
             shops = db_session.query(Shop).all()
             return render_template("shop/shoplist.html", shops=shops)
 
-        return abort(401, "You are not authozired, plz login first")
-
 
 class CreateShop(View):
     """CreateShop Operation class"""
     methods = ["GET","POST"]
-    decorators = [login_required,]
+    decorators = [login_required,admin_only]
     def dispatch_request(self):
         """function to create shop"""
         r_user_id = session.get('r_user_id')
@@ -106,7 +104,7 @@ class CreateShop(View):
 class AdminDeleteShop(View):
     """AdminDeleteShop Operation class"""
     methods = ["GET","POST"]
-    decorators = [login_required,]
+    decorators = [login_required,admin_only]
     def dispatch_request(self,id):
         """function to delete shop"""
         r_user_id = session.get('r_user_id')
@@ -116,19 +114,17 @@ class AdminDeleteShop(View):
             db_session.commit()
             return redirect(url_for("shop.list_shop"))
 
-        return abort(401, "You are not authozired, plz login first")
-
 
 class UpdateShop(View):
     """Update Shop Operation class"""
-    methods = ["GET","POST"]
-    decorators = [login_required,]
+    methods = ["POST"]
+    decorators = [login_required,admin_only]
     def dispatch_request(self, id):
         """function to update shop"""
         r_user_id = session.get('r_user_id')
         user = db_session.query(Userdata).get(r_user_id)
 
-        if request.method == 'POST' and user.is_admin:
+        if request.method == 'POST' and user.is_admin == True:
 
             store_name = request.form.get('store_name')
             description = request.form.get('description')
@@ -146,5 +142,3 @@ class UpdateShop(View):
             })
             db_session.commit()
             return redirect(url_for("shop.list_shop"))
-
-        return abort(401, "You are not authozired, plz login first")

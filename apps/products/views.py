@@ -9,7 +9,7 @@ from sqlalchemy.orm import sessionmaker
 
 from apps.products.models import Product, Category
 from apps.users.models import Userdata
-from apps.users.models import login_required
+from apps.users.models import login_required,admin_only,shopuser_only,admin_shopuser_only,customer_only
 
 some_engine = create_engine(os.environ.get('DATABASE_URL'))
 # some_engine = create_engine('postgresql+psycopg2://admin:admin@localhost:5432/testShop')
@@ -24,7 +24,7 @@ db_session = Session()
 class ShopDashboard(View):
     """ShopDashboard Operation class"""
     methods = ["GET","POST"]
-    decorators = [login_required,]
+    decorators = [login_required,admin_shopuser_only]
     def dispatch_request(self):
         """function to show dashboard """
         r_user_id = session.get('r_user_id')
@@ -33,7 +33,7 @@ class ShopDashboard(View):
             products = db_session.query(Product).filter(Product.user_id == user.id).all()
             category = Category.query.all()
             return render_template('shop/shopDashboard.html', product=products, category=category)
-        return abort(401, "You are not authozired, plz login first")
+        # return abort(401, "You are not authozired, plz login first")
 
 # @bp.route("/list_shop", methods=['POST','GET'])
 # def list_shop():
@@ -46,11 +46,12 @@ class ShopDashboard(View):
 class AddCategory(View):
     """add category Operation class"""
     methods = ["GET","POST"]
-    decorators = [login_required,]
+    decorators = [login_required,admin_only]
     def dispatch_request(self):
         """function to create category """
         r_user_id = session.get('r_user_id')
         user = Userdata.query.get(r_user_id)
+        print("8888888888888888888888888888888888")
         error = None
         if request.method == 'POST' and user.is_admin:
             category_data = request.form.get('category')
@@ -68,20 +69,20 @@ class AddCategory(View):
                     db_session.add(category)
                     db_session.commit()
 
-                except Exception as e:
-                    raise e
-                    # error = f"User {username} is already registered."
+                except Exception:
+                    error = f"Category is required parameter"
                 else:
                     return redirect(url_for("auth.all_category"))
 
             flash(error)
+            return redirect(url_for("auth.all_category"))
         return render_template('product/createCategory.html')
 
 
 class UpdateCategory(View):
     """update_category Operation class"""
     methods = ["GET","POST"]
-    decorators = [login_required,]
+    decorators = [login_required,admin_only]
     def dispatch_request(self,cat_id):
         """update_category"""
         r_user_id = session.get('r_user_id')
@@ -94,28 +95,20 @@ class UpdateCategory(View):
                 error = 'category is required.'
 
             date = datetime.datetime.now()
-            try:
-                category = Category(user_id=user.id,
-                                    category_name=category_data,
-                                    active=True, created_at=date,
-                                    updated_at=date)
+            if not error:
                 db_session.query(Category).filter(Category.id == cat_id).update(
                     {'category_name': category_data, 'updated_at': date})
                 db_session.commit()
-            except Exception as e:
-                raise e
-                # error = f"User {username} is already registered."
-            else:
                 return redirect(url_for("auth.all_category"))
 
             flash(error)
-        return abort(401, "You are not authozired, plz login first")
+            return redirect(url_for("auth.all_category"))
 
 
 class CreateProduct(View):
     """create_product Operation class"""
     methods = ["GET","POST"]
-    decorators = [login_required,]
+    decorators = [login_required,admin_shopuser_only]
     def dispatch_request(self):
         """function to create product """
         r_user_id = session.get('r_user_id')
@@ -131,13 +124,13 @@ class CreateProduct(View):
             if not category_id:
                 error = 'category is required.'
             if not product_name:
-                error = 'password is required.'
+                error = 'product name is required.'
             if not stock_quantity:
-                error = 'full name is required.'
+                error = 'stock is required.'
             if not brand:
-                error = 'address is required.'
+                error = 'brand is required.'
             if not price:
-                error = 'gender is required.'
+                error = 'price is required.'
             date = datetime.datetime.now()
 
             if error is None:
@@ -146,7 +139,7 @@ class CreateProduct(View):
                     stock_quantity = request.form.get('stock_quantity')
                     brand = request.form.get('brand')
                     price = request.form.get('price')
-                    shop_id = user.shop[0].id if user.is_shopuser else 5
+                    shop_id = user.shop[0].id if user.is_shopuser else 2
                     product = Product(user_id=user.id, shop_id=shop_id,
                                     category_id=category_id,
                                     product_name=product_name,
@@ -157,10 +150,10 @@ class CreateProduct(View):
                     db_session.add(product)
                     db_session.commit()
 
-                except Exception as e:
+                except Exception:
                     db_session.rollback()
-                    raise e
-                    # error = f"User {username} is already registered."
+                    error = """category,product name,stock quantity,
+                                    sold quantity, brand, price all are should be correct format """
                 else:
                     if user.is_shopuser:
                         return redirect(url_for("product.shop_dashboard"))
@@ -168,6 +161,7 @@ class CreateProduct(View):
                         return redirect(url_for("auth.all_product"))
 
             flash(error)
+            return render_template('product/createproduct.html')
         category = Category.query.all()
         return render_template('product/createproduct.html', category=category)
 
@@ -175,7 +169,7 @@ class CreateProduct(View):
 class DeleteProduct(View):
     """DeleteProduct Operation class"""
     methods = ["GET","POST"]
-    decorators = [login_required,]
+    decorators = [login_required,admin_shopuser_only]
     def dispatch_request(self,id):
         """function to delete product """
         r_user_id = session.get('r_user_id')
@@ -188,13 +182,12 @@ class DeleteProduct(View):
                 return redirect(url_for("product.shop_dashboard"))
             else:
                 return redirect(url_for("auth.all_product"))
-        return abort(401, "You are not authozired, plz login first")
 
 
 class UpdateProduct(View):
     """update_product Operation class"""
     methods = ["GET","POST"]
-    decorators = [login_required,]
+    decorators = [login_required,admin_shopuser_only]
     def dispatch_request(self,id):
         """function to update product """
         r_user_id = session.get('r_user_id')
@@ -210,13 +203,13 @@ class UpdateProduct(View):
             if not category_id:
                 error = 'category is required.'
             if not product_name:
-                error = 'password is required.'
+                error = 'product name is required.'
             if not stock_quantity:
-                error = 'full name is required.'
+                error = 'stock is required.'
             if not brand:
-                error = 'address is required.'
+                error = 'brand is required.'
             if not price:
-                error = 'gender is required.'
+                error = 'price is required.'
             if error is None:
                 date = datetime.datetime.now()
                 product = db_session.query(Product).get(id)
@@ -237,4 +230,7 @@ class UpdateProduct(View):
                 db_session.commit()
                 return redirect(url_for("product.shop_dashboard"))
             flash(error)
-        return abort(401, "You are not authozired, plz login first")
+            if user.is_shopuser:
+                return redirect(url_for("product.shop_dashboard"))
+            else:
+                return redirect(url_for("auth.all_product"))

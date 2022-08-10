@@ -13,14 +13,7 @@ Bootstrap(app)
 
 
 # DB configuration
-# username = 'admin'
-# password = 'admin'
-# host_url = 'localhost'
-# port = '5432'
-# db_name = 'testShop'
 
-# DB_URL = 'postgresql+psycopg2://{user}:{pw}@{url}/{db_name}'.format(
-#     user=username, pw=password, url=host_url,  db_name=db_name)
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL')
 # app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////tmp/test.db'
 db_sql=SQLAlchemy(app)
