@@ -29,7 +29,7 @@
               </tr>
         </thead>
         <tbody>
-            
+          {% if cart %}
             <!-- %for  sh in cart% -->
             {% for i,j in cart.items.items() %}
             
@@ -83,6 +83,7 @@
               </div>
           </div>
           {% endfor %}
+          {% endif %}
           <!-- % endfor % -->
           
           </tbody>

@@ -1,0 +1,30 @@
+version: '3.9'
+
+services:
+  pythonapp:
+    container_name: shop
+    image: herokushop2
+    build: .
+    ports:
+      - "5001:5000"
+    environment:
+      - DATABASE_URL=postgres://sdyfeipbuootgr:0a59a8ac47f990b0233279d18d1623d82120c449bb5e6f19cef3088d62e52427@ec2-44-193-178-122.compute-1.amazonaws.com:5432/da3043ab1s4rca
+
+    depends_on:
+      - db
+  
+  db:
+    container_name: db
+    image: postgres:12
+    ports:
+      - "5433:5432"
+    environment:
+      - POSTGRES_PASSWORD=0a59a8ac47f990b0233279d18d1623d82120c449bb5e6f19cef3088d62e52427
+      - POSTGRES_USER=sdyfeipbuootgr
+      - POSTGRES_DB=da3043ab1s4rca
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+
+volumes:
+  pgdata: {}

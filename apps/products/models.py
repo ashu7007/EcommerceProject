@@ -9,7 +9,7 @@ class Category(db.Model):
     """ Product Category model"""
     __tablename__ = 'category'
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('userdata.id'))
+    user_id = db.Column(db.Integer, db.ForeignKey('userdata.id',ondelete='SET NULL'))
     category_name = db.Column(db.String(255), nullable=False)
     active = db.Column(db.Boolean, nullable=False)
     created_at = db.Column(db.DateTime)
@@ -23,8 +23,8 @@ class Product(db.Model):
     """ Product model"""
     __tablename__ = 'product'
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('userdata.id'))
-    shop_id = db.Column(db.Integer, db.ForeignKey('shop.id'))
+    user_id = db.Column(db.Integer, db.ForeignKey('userdata.id',ondelete='SET NULL'))
+    shop_id = db.Column(db.Integer, db.ForeignKey('shop.id',ondelete='SET NULL'))
     category_id = db.Column(db.Integer, db.ForeignKey('category.id'))
     product_name = db.Column(db.String(255), nullable=False)
     stock_quantity = db.Column(db.Integer, nullable=False)
@@ -54,8 +54,8 @@ class Rating(db.Model):
     """ Product Rating model"""
     __tablename__ = 'rating'
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('userdata.id'))
-    product_id = db.Column(db.Integer, db.ForeignKey('product.id'))
+    user_id = db.Column(db.Integer, db.ForeignKey('userdata.id', ondelete='SET NULL'))
+    product_id = db.Column(db.Integer, db.ForeignKey('product.id', ondelete='SET NULL'))
     rating = db.Column(db.Integer, nullable=False)
     review = db.Column(db.String(255), nullable=False)
     created_at = db.Column(db.DateTime)

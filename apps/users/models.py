@@ -1,3 +1,4 @@
+"""Models related to user operations"""
 import enum
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 from flask import current_app
@@ -11,6 +12,7 @@ db = db_sql
 
 
 class Userdata(db.Model):
+    """Model for users"""
     __tablename__ = 'userdata'
     id = db.Column(db.Integer, primary_key=True)
     full_name = db.Column(db.String(255), nullable=False)
@@ -66,7 +68,7 @@ class Cart(db.Model):
     """model for cart"""
     __tablename__ = 'cart'
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('userdata.id'))
+    user_id = db.Column(db.Integer, db.ForeignKey('userdata.id',ondelete='SET NULL'))
     items = db.Column(JSON)
     created_at = db.Column(db.DateTime)
     updated_at = db.Column(db.DateTime)
@@ -92,7 +94,7 @@ class Orders(db.Model):
 
     __tablename__ = 'orders'
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('userdata.id'))
+    user_id = db.Column(db.Integer, db.ForeignKey('userdata.id',ondelete='SET NULL'))
     status = db.Column(db.Enum(Status))
     payment = db.Column(db.Enum(Payment))
     created_at = db.Column(db.DateTime)
@@ -109,8 +111,8 @@ class OrderDetail(db.Model):
     __tablename__ = 'orderdetail'
 
     id = db.Column(db.Integer, primary_key=True)
-    order_id = db.Column(db.Integer, db.ForeignKey('orders.id'))
-    product_id = db.Column(db.Integer, db.ForeignKey('product.id'))
+    order_id = db.Column(db.Integer, db.ForeignKey('orders.id',ondelete='SET NULL'))
+    product_id = db.Column(db.Integer, db.ForeignKey('product.id', ondelete='SET NULL'))
     quantity = db.Column(db.Integer, nullable=False)
     price = db.Column(db.Integer, nullable=False)
     created_at = db.Column(db.DateTime)
@@ -125,7 +127,7 @@ class OTP(db.Model):
 
     __tablename__ = 'otp'
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('userdata.id'))
+    user_id = db.Column(db.Integer, db.ForeignKey('userdata.id',ondelete='SET NULL'))
     otp = db.Column(db.Integer, nullable=False)
     created_at = db.Column(db.DateTime)
     updated_at = db.Column(db.DateTime)
@@ -138,7 +140,7 @@ class Shop(db.Model):
     """model for shop"""
     __tablename__ = 'shop'
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('userdata.id'))
+    user_id = db.Column(db.Integer, db.ForeignKey('userdata.id',ondelete='SET NULL'))
     store_name = db.Column(db.String(255), nullable=False)
     description = db.Column(db.String(255), nullable=False)
     active = db.Column(db.Boolean, nullable=False)
@@ -156,11 +158,82 @@ class ShopRejection(db.Model):
     """model for shop rejection"""
     __tablename__ = 'shoprejection'
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('userdata.id'))
-    shop_id = db.Column(db.Integer, db.ForeignKey('shop.id'))
+    user_id = db.Column(db.Integer, db.ForeignKey('userdata.id',ondelete='SET NULL'))
+    shop_id = db.Column(db.Integer, db.ForeignKey('shop.id',ondelete='SET NULL'))
     description = db.Column(db.String(255), nullable=False)
     created_at = db.Column(db.DateTime)
     updated_at = db.Column(db.DateTime)
 
     def __repr__(self):
         return f"'{self.id}','{self.user_id}'"
+
+from apps import app
+from sqlalchemy import create_engine, desc
+from sqlalchemy.orm import sessionmaker
+import functools
+import os
+from flask import Flask, render_template, session, redirect, g, url_for, abort
+some_engine = create_engine(os.environ.get('DATABASE_URL'))
+Session = sessionmaker(bind=some_engine)
+db_session = Session()
+@app.before_request
+def load_logged_in_user():
+    """ logged user"""
+    user_id = session.get('r_user_id')
+
+    if user_id is None:
+        g.user = None
+    else:
+        g.user = db_session.query(Userdata).filter(Userdata.id == user_id).first()
+
+
+def login_required(view):
+    """ function to check logged-in user"""
+    @functools.wraps(view)
+    def wrapped_view(**kwargs):
+        if g.user is None:
+            return redirect(url_for('auth.login'))
+
+        return view(**kwargs)
+
+    return wrapped_view
+
+def admin_only(func):
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        if g.user is None:
+            return redirect(url_for('auth.login'))
+        if not g.user.is_admin:
+            abort(403)
+        return func(*args, **kwargs)
+    return wrapper
+
+def admin_shopuser_only(func):
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        if g.user is None:
+            return redirect(url_for('auth.login'))
+        if not g.user.is_admin and not g.user.is_shopuser:
+            abort(403)
+        return func(*args, **kwargs)
+    return wrapper
+
+def shopuser_only(func):
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        if g.user is None:
+            return redirect(url_for('auth.login'))
+        if not g.user.is_shopuser:
+            abort(403)
+        return func(*args, **kwargs)
+    return wrapper
+
+def customer_only(func):
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        if g.user is None:
+            return redirect(url_for('auth.login'))
+        if not g.user.is_customer:
+            abort(403)
+        return func(*args, **kwargs)
+    return wrapper
